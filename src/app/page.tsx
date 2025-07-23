@@ -94,7 +94,7 @@ export default function Page() {
             ) : modoB2B && !torre ? (
               <TorreSelector onSelect={handleTorreSeleccionada} />
             ) : vistaEspecial === "notasAvances" ? (
-              <NotasAvances torre={torre} usuario={usuario} />
+              <NotasAvances torre={torre}/>
             ) : vistaEspecial === "notasConciliacion" ? (
               <NotasConciliacion torre={torre} />
             ) : vistaEspecial === "notasSeguimiento" ? (
