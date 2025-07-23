@@ -1,0 +1,146 @@
+/* FONDO GENERAL */
+/* Centra el formulario en pantalla completa (vertical y horizontal) */
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Altura total de la ventana */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* CONTENEDOR DEL FORMULARIO */
+/* Caja principal dividida en dos secciones, con fondo oscuro y bordes redondeados */
+.login-form-container {
+  display: flex;
+  width: 900px;
+  background: linear-gradient(to right, #1a212d, #000000); /* Gradiente oscuro */
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); /* Sombra para dar profundidad */
+  position: relative;
+}
+
+/* SECCIÓN IZQUIERDA: FORMULARIO DE LOGIN */
+.form-section {
+  flex: 2; /* Ocupa mayor parte del contenedor */
+  padding: 62px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 13px; /* Espacio entre elementos */
+}
+
+/* AVATAR CIRCULAR EN LA CABECERA DEL FORMULARIO */
+.avatar-circle {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(to right, #3b82f6, #143e9c); /* Azul degradado */
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+/* GRUPO DE INPUTS CON ICONOS */
+.input-group {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(to right, #313945, #000000);
+  padding: 12px 15px;
+  border-radius: 10px;
+  color: #ffffff;
+  gap: 13px; /* Espacio entre ícono e input */
+}
+
+/* INPUTS DEL FORMULARIO */
+.input-group input {
+  background: #ffffff;
+  border: none;
+  outline: none;
+  color: #070707;
+  width: 100%;
+  font-size: 20px;
+}
+
+/* PLACEHOLDER SUAVE */
+.input-group input::placeholder {
+  color: #94a3b8;
+}
+
+/* BOTÓN DE INGRESO */
+.form-section button {
+  margin-top: 10px;
+  padding: 14px;
+  font-size: 16px;
+  background: linear-gradient(to right, #3b82f6, #143e9c); /* Azul moderno */
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+/* EFECTO HOVER EN BOTÓN DE INGRESO */
+.form-section button:hover {
+  background-color: #00e676; /* Verde brillante */
+}
+
+/* ENLACE PARA CAMBIAR DE REGISTRO A LOGIN Y VICEVERSA */
+.switch-link {
+  font-size: 14px;
+  color: #cbd5e1;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* SECCIÓN DERECHA: INFORMACIÓN O FONDO DECORATIVO */
+.info-section {
+  flex: 1; /* Ocupa menor parte del contenedor */
+  background: linear-gradient(135deg, #1b4fbc54, #00000022); /* Fondo decorativo con transparencia */
+  color: white;
+  padding: 45px;
+  position: relative; /* Para posicionar internamente la marca de agua */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* MARCA DE AGUA EN LA SECCIÓN DERECHA */
+/* Imagen decorativa con opacidad, centrada y convertida a blanco */
+.marca-login {
+  background-image: url("/logo-marca-agua.png");
+  background-repeat: no-repeat;
+  background-size: 138px;
+  background-position: center;
+  opacity: 0.2;
+  filter: brightness(0) invert(1); /* Convierte negro en blanco */
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Evita que bloquee clics */
+}
+
+.logout-button {
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  margin: 1rem auto;
+  transition: background 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #b91c1c;
+}

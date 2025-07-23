@@ -1,0 +1,168 @@
+/* ========================= */
+/* MODAL: FONDO Y ESTRUCTURA */
+/* ========================= */
+
+/* FONDO OSCURO CON DESENFOQUE */
+/* Cubre toda la pantalla, centra el modal y aplica desenfoque + animación de aparición */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);         /* Fondo negro semi-transparente */
+  backdrop-filter: blur(4px);             /* Desenfoque suave */
+  display: flex;
+  align-items: center;                    /* Centrado vertical */
+  justify-content: center;               /* Centrado horizontal */
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;            /* Animación de entrada suave */
+}
+
+/* CONTENIDO DEL MODAL */
+/* Caja blanca centrada con sombra, borde redondeado y animación */
+.modal-content {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  animation: scaleIn 0.3s ease;           /* Animación de aparición con zoom */
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* BOTÓN DE CIERRE (X) */
+/* Botón rojo circular en la esquina superior derecha del modal */
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: #f44336;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* EFECTO HOVER DEL BOTÓN DE CIERRE */
+.modal-close:hover {
+  background: #d32f2f;
+}
+
+/* TÍTULO DEL MODAL */
+.modal-content h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* ETIQUETAS DE LOS CAMPOS */
+.modal-content label {
+  display: block;
+  margin: 1rem 0 0.3rem;
+  font-weight: bold;
+  color: #444;
+}
+
+/* CAMPOS DE TEXTO E INPUT */
+/* Inputs modernos con borde redondeado y transición en focus */
+.modal-content input,
+.modal-content textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+/* EFECTO DE ENFOQUE (focus) EN INPUTS Y TEXTAREAS */
+.modal-content input:focus,
+.modal-content textarea:focus {
+  border-color: #007bff; /* Azul intenso */
+  outline: none;
+}
+
+/* ============================= */
+/* BOTONES DE GUARDAR Y ELIMINAR */
+/* ============================= */
+
+/* CONTENEDOR DE BOTONES */
+/* Acomoda los botones en columna con espacio entre ellos */
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+/* ESTILO BASE PARA BOTONES */
+.modal-save-button,
+.modal-delete-button {
+  width: 100%;
+  padding: 0.7rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+/* BOTÓN DE GUARDAR (AZUL) */
+.modal-save-button {
+  background: linear-gradient(to right, #3b82f6, #0e40af);
+  color: white;
+}
+
+/* HOVER DEL BOTÓN DE GUARDAR */
+.modal-save-button:hover {
+  background-color: #388e3c; /* Verde (¿error? puedes ajustar si no es intencional) */
+}
+
+/* BOTÓN DE ELIMINAR (ROJO) */
+.modal-delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+/* HOVER DEL BOTÓN DE ELIMINAR */
+.modal-delete-button:hover {
+  background-color: #d32f2f;
+}
+
+/* ================= */
+/* ANIMACIONES CLAVE */
+/* ================= */
+
+/* FADE IN: SUAVE APARICIÓN */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* SCALE IN: ZOOM DE ENTRADA */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

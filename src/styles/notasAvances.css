@@ -1,0 +1,229 @@
+/* =============================== */
+/* CONTENEDOR GENERAL DE LA VISTA */
+/* =============================== */
+.notas-avances-container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 30px;
+  border-radius: 16px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* TÍTULO PRINCIPAL */
+.notas-avances-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* =================== */
+/* BOTONES DE CATEGORÍA */
+/* =================== */
+
+/* Contenedor de botones */
+.botones-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* Botón individual */
+.boton {
+  background: #e2e8f0;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  color: #34495e;
+  box-shadow: 4px 4px 10px #d1d9e6, -4px -4px 10px #ffffff;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+/* Efecto al pasar el mouse */
+.nota-item {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: inset 2px 2px 6px #a1a1a1, inset -2px -2px 6px #ffffff;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Efecto de "subida" */
+.nota-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* efecto de sombra externa opcional */
+}
+
+/* Estado activo del botón */
+.boton.activo {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.6);
+  transform: scale(1.05);
+}
+
+/* ===================== */
+/* CAJA DE TEXTO FIJA */
+/* ===================== */
+.caja-texto-fija {
+  background: #f1f5f9;
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: inset 3px 3px 8px #cbd5e1, inset -3px -3px 8px #ffffff;
+}
+
+/* TEXTAREA ESTILIZADA PARA NOTAS */
+.nota-textarea {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #ffffff;
+  color: #334155;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.nota-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+/* INDICACIÓN CUANDO NO HAY NOTA SELECCIONADA */
+.seleccion-indicacion {
+  text-align: center;
+  color: #94a3b8;
+  font-style: italic;
+  margin-top: 50px;
+  font-size: 1.1rem;
+}
+
+/* ======================== */
+/* BOTONES DE ACCIONES FINALES */
+/* ======================== */
+.botones-accion {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Estilo general de botón de acción */
+.boton-accion {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.boton-accion:hover {
+  transform: translateY(-2px);
+}
+
+/* Botón de copiar */
+.boton-accion.copiar {
+  background-color: #10b981;
+}
+.boton-accion.copiar:hover {
+  background-color: #059669;
+}
+
+/* Botón de limpiar */
+.boton-accion.limpiar {
+  background-color: #ef4444;
+}
+.boton-accion.limpiar:hover {
+  background-color: #dc2626;
+}
+
+/* ========================= */
+/* LISTADO Y FORMATO DE NOTAS */
+/* ========================= */
+.notas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Item individual de nota */
+.nota-item {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: inset 2px 2px 6px #a1a1a1, inset -2px -2px 6px #ffffff;
+  display: flex;
+  flex-direction: column; /* 📌 texto arriba, botones abajo */
+}
+
+/* Texto de la nota */
+.nota-texto {
+  color: #000000;
+  white-space: pre-wrap;
+  font-size: 1rem;
+}
+
+/* Contenedor de botones por nota */
+.nota-botones {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+/* Botones dentro de cada nota */
+.nota-botones button {
+  background: linear-gradient(to right, #3b82f6, #0e40af);
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  color: white;
+  box-shadow: 2px 2px 5px #d1d9e6;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.nota-botones button:hover {
+  background: #1e3a8a;
+  transform: scale(1.05);
+}
+
+/* BOTÓN PARA AGREGAR NUEVAS NOTAS */
+.agregar-button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 20px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.agregar-button:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}

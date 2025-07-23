@@ -1,0 +1,210 @@
+/* 📦 CONTENEDOR GENERAL DE LA VISTA */
+.aplicativos-container {
+  display: flex;                     /* Contenedor en modo fila */
+  gap: 2rem;                         /* Espacio entre panel y zona de contenido */
+  padding: 2rem;                    /* Espaciado interno general */
+  font-family: 'Segoe UI', sans-serif;  /* Fuente predeterminada */
+}
+
+/* 📂 PANEL LATERAL DE CATEGORÍAS */
+.panel-categorias {
+  width: 251px;                         /* Ancho fijo del panel */
+  background-color: #163245;           /* Color de fondo base */
+  border-radius: 12px;                 /* Bordes redondeados */
+  padding: 4rem;                       /* Espaciado interno */
+  box-shadow: 0 11px 43px rgba(0, 0, 0, 0.05); /* Sombra suave */
+  background: linear-gradient(to right, #000000, rgb(46 82 129 / 74%)); /* Degradado */
+}
+
+.panel-categorias h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* 🎯 Cada opción de categoría */
+.categoria-opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+/* 🔘 Botón para seleccionar una categoría */
+.categoria-btn {
+  all: unset;                         /* Elimina todos los estilos por defecto */
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  background-color: transparent;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.categoria-btn:hover {
+  background-color: #e5e7eb;         /* Fondo gris claro al pasar el mouse */
+}
+
+/* ✅ Estilo para categoría seleccionada */
+.categoria-btn.activa {
+  color: #2563eb;                     /* Azul intenso */
+  font-weight: 700;
+  background-color: #ffffff;
+}
+
+/* 🔢 Contador de aplicativos por categoría */
+.contador {
+  background-color: #e0e7ff;
+  color: #1e3a8a;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+/* 🗑️ Botón para eliminar categoría */
+.btn-eliminar-categoria {
+  background: linear-gradient(to right, #1d2636, #1a1a1a);
+  border: none;
+  color: #ad0000;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.btn-eliminar-categoria:hover {
+  transform: scale(1.2);             /* Efecto de ampliación al pasar el mouse */
+}
+
+/* ➕ Botón para agregar categoría */
+.btn-agregar-categoria {
+  margin-top: 1rem;
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-agregar-categoria:hover {
+  background-color: #1d4ed8;         /* Azul más oscuro al hacer hover */
+}
+
+/* 🧱 ZONA PRINCIPAL DE LOS APLICATIVOS */
+.zona-aplicativos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.zona-aplicativos h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+/* 🧩 GRID DE APLICATIVOS - tres columnas */
+.lista-aplicativos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* ← exactamente 3 columnas */
+  gap: 1.5rem;
+}
+
+/* 🪪 TARJETA DE APLICATIVO */
+.item-aplicativo {
+  border-radius: 1rem;
+  padding: 1.2rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.item-aplicativo:hover {
+  transform: translateY(-4px);       /* Levanta la tarjeta al hacer hover */
+  background-color: #ffffff;
+}
+
+.item-aplicativo a {
+  color: #111827;
+  text-decoration: none;
+}
+
+/* 📛 Nombre debajo del ícono del aplicativo */
+.nombre-app {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ⚙️ Botones de editar y eliminar */
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.btn-editar,
+.btn-eliminar {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.btn-editar {
+  color: #2563eb;
+}
+
+.btn-eliminar {
+  color: #dc2626;
+}
+
+.btn-editar:hover,
+.btn-eliminar:hover {
+  transform: scale(1.2);             /* Efecto de zoom al pasar el mouse */
+}
+
+/* ➕ BOTÓN AGREGAR NUEVO APLICATIVO */
+.btn-agregar {
+  margin-top: 2rem;
+  align-self: flex-start;
+  background-color: #10b981;
+  color: white;
+  padding: 0.75rem 1.2rem;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-agregar:hover {
+  background-color: #059669;         /* Verde más oscuro al hacer hover */
+}
+
+/* 🎨 Fondo de la zona principal */
+.contenido-aplicativos {
+  text-align: center;
+  background: linear-gradient(to right, #ffffff00, #f9fbfd8a); /* Transparente a blanco sutil */
+}
+
+/* 🖋️ Ajustes extra de fuente del panel lateral */
+.panel-categorias {
+  font-size: 14px;
+  color: #ffffff;
+}

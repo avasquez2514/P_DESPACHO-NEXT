@@ -1,0 +1,137 @@
+/* =============================== */
+/* CONTENEDOR PRINCIPAL CENTRALIZADO */
+/* =============================== */
+.notas-conciliacion-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* TARJETA CONTENEDORA DE TODO EL BLOQUE DE NOTAS */
+.notas-conciliacion-card {
+  padding: 2.5rem;
+  border-radius: 20px;
+  max-width: 850px;
+  width: 100%;
+  text-align: center;
+}
+
+/* TÍTULO PRINCIPAL */
+.notas-conciliacion-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  color: #1f2937;
+}
+
+/* =============================== */
+/* LISTADO DE NOTAS EN FORMATO GRID */
+/* =============================== */
+.notas-conciliacion-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+/* ITEM INDIVIDUAL DE CONCILIACIÓN */
+.conciliacion-item {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+  box-shadow:inset 2px 2px 6px #a1a1a1, inset -2px -2px 6px #ffffff
+}
+
+/* ANIMACIÓN AL PASAR EL CURSOR */
+.conciliacion-item:hover {
+  transform: translateY(-4px);
+}
+
+/* TEXTO DE LA NOTA */
+.conciliacion-texto {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #000000;
+  flex-grow: 1;
+  text-align: left;
+}
+
+/* CONTENEDOR DE BOTONES DE ACCIÓN */
+.conciliacion-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+/* BOTÓN DE COPIAR / EDITAR / ELIMINAR */
+.conciliacion-button {
+  background: linear-gradient(to right, #3b82f6, #0e40af);
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  width: 40px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s, background-color 0.3s;
+  box-shadow: 2px 2px 5px #d1d9e6;
+}
+
+/* HOVER SOBRE LOS BOTONES */
+.conciliacion-button:hover {
+  background-color: #1e40af;
+  transform: scale(1.1);
+}
+
+/* ============================= */
+/* DISTRIBUCIÓN POR BLOQUES EN 3 COLUMNAS */
+/* ============================= */
+.bloques-conciliacion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+/* BLOQUE INDIVIDUAL */
+.bloque {
+  background-color: #f9fafb;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* TÍTULO DE BLOQUE (opcional si se usa h4) */
+.bloque h4 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #1e293b;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.5rem;
+}
+
+/* ============================= */
+/* RESPONSIVE PARA PANTALLAS PEQUEÑAS */
+/* ============================= */
+@media (max-width: 900px) {
+  .bloques-conciliacion-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .bloques-conciliacion-grid {
+    grid-template-columns: 1fr;
+  }
+}

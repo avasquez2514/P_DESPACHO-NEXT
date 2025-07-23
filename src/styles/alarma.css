@@ -1,0 +1,144 @@
+/* CONTENEDOR GENERAL */
+/* Define el contenedor principal con ancho máximo, centrado, padding, borde redondeado y fuente */
+.alarma-container {
+  max-width: 600px;
+  margin: 4rem auto;
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  text-align: center;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* TÍTULO CON EMOJI */
+/* Estilo del título principal: grande, negrita y con ícono alineado */
+.alarma-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* INPUTS Y BOTÓN EN FILA */
+/* Contenedor de los campos de entrada y botón, con espacio y alineación responsiva */
+.alarma-input-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* INPUTS MODERNOS */
+/* Campos de entrada con estilo moderno: padding, bordes suaves, fondo claro y transición al enfocar */
+.alarma-input {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.2s;
+  min-width: 150px;
+}
+
+.alarma-input:focus {
+  border-color: #3b82f6; /* Borde azul al enfocar */
+}
+
+/* BOTÓN AZUL ESTILO MODERNO */
+/* Botón para agregar alarmas con gradiente azul y efectos de hover */
+.alarma-agregar {
+  background: linear-gradient(to right, #3b82f6, #0e40af);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.alarma-agregar:hover {
+  background: linear-gradient(to right, #2563eb, #1d4ed8); /* Color más intenso al pasar el mouse */
+}
+
+/* MENSAJE CUANDO NO HAY ALARMAS */
+/* Texto gris e italic cuando no hay alarmas registradas */
+.alarma-empty {
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+/* LISTADO DE ALARMAS */
+/* Estilo base para el listado de alarmas (sin viñetas) */
+.alarma-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ELEMENTO INDIVIDUAL DE ALARMA */
+/* Tarjeta de alarma con borde, fondo claro, sombra y contenido alineado */
+.alarma-item {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* HORA DE LA ALARMA */
+/* Texto con formato destacado para mostrar la hora de cada alarma */
+.alarma-hora {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* BOTÓN ELIMINAR */
+/* Botón rojo para eliminar la alarma, con efectos de hover */
+.alarma-eliminar {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.alarma-eliminar:hover {
+  background-color: #b91c1c; /* Rojo más oscuro al pasar el mouse */
+}
+
+/* OVERLAY DE ALARMA (pantalla completa al activar) */
+/* Pantalla negra de alerta en modo fullscreen con texto centrado y clic para cerrar */
+.alarma-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: black;
+  color: white;
+  font-size: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  cursor: pointer;
+}
