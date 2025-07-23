@@ -12,6 +12,7 @@ interface SidebarProps {
   torreSeleccionada: string | null;             // Torre actualmente seleccionada (si hay).
   onVolverInicio: () => void;                   // Función para volver a la vista de inicio.
   cerrarSesion: () => void;                     // Función que cierra sesión del usuario.
+  modoB2B: boolean;
 }
 
 // Componente principal del sidebar con submenús interactivos
