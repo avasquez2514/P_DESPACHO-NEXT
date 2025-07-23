@@ -45,7 +45,7 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
     nota_interna: "",
   });
 
-  const API = "http://localhost:4000/api/notas"; // URL de la API
+  const API = `${process.env.NEXT_PUBLIC_API_URL}/api/notas`;
 
   /**
    * Carga las plantillas del backend según el usuario autenticado.

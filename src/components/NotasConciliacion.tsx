@@ -5,6 +5,10 @@ import { FaTrash } from "react-icons/fa";
 import "../styles/notasConciliacion.css";
 import Modal from "./Modal"; // Componente Modal reutilizable
 
+interface NotasConciliacionProps {
+  torre: string;
+}
+
 // 📘 Tipo para el estado del modo actual del modal
 type Modo = "agregar" | "modificar" | "";
 
@@ -23,7 +27,8 @@ const categoriasIniciales = [
   "CONCILIACION BMC",
 ];
 
-const NotasConciliacion: React.FC = () => {
+const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
+
   // 🔧 Estados del modal y edición
   const [modalOpen, setModalOpen] = useState(false);
   const [modo, setModo] = useState<Modo>("");

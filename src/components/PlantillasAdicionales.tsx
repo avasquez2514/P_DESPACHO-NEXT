@@ -30,7 +30,7 @@ const PlantillasAdicionales: React.FC = () => {
   }>({ id: null, nombre: "", texto: "" });
 
   // Ruta base del backend (ajustar si cambias de servidor)
-  const API = "http://localhost:4000/api/notas";
+  const API = `${process.env.NEXT_PUBLIC_API_URL}/api/notas`;
 
   /**
    * Función para cargar las plantillas del backend.

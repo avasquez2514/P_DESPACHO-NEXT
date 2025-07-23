@@ -4,40 +4,35 @@ import React, { FormEvent, useState } from "react";
 import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import "../styles/loginregistro.css";
 
-// 📘 Interface para tipar las props del componente
 interface LoginRegistroProps {
-  onLogin: (usuario: any) => void; // Función que se ejecuta cuando el usuario inicia sesión o se registra exitosamente
+  onLogin: (usuario: any) => void;
 }
 
-// 🧠 Componente principal
 const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
-  // 🔐 Estados del formulario
-  const [esRegistro, setEsRegistro] = useState(false);         // Controla si estamos en modo registro o login
-  const [email, setEmail] = useState("");                      // Email del usuario
-  const [nombre, setNombre] = useState("");                    // Nombre (solo se usa en registro)
-  const [contraseña, setContraseña] = useState("");            // Contraseña
-  const [cargando, setCargando] = useState(false);             // Estado de carga para evitar múltiples envíos
+  const [esRegistro, setEsRegistro] = useState(false);
+  const [email, setEmail] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [contraseña, setContraseña] = useState("");
+  const [cargando, setCargando] = useState(false);
 
-  // 💾 Guardar sesión en localStorage
   const guardarSesionEnLocalStorage = (token: string, usuario: any) => {
-    localStorage.setItem("token", token);                      // Guarda el token
-    localStorage.setItem("usuario", JSON.stringify(usuario)); // Guarda el objeto usuario
+    localStorage.setItem("token", token);
+    localStorage.setItem("usuario", JSON.stringify(usuario));
   };
 
-  // 📤 Manejo del formulario
   const manejarEnvio = async (e: FormEvent) => {
-    e.preventDefault(); // Previene recarga
+    e.preventDefault();
 
-    // Determina si estamos en login o registro
     const ruta = esRegistro ? "registro" : "login";
     const datos = esRegistro
       ? { email, nombre, contraseña }
       : { email, contraseña };
 
     try {
-      setCargando(true); // Activa estado de carga
+      setCargando(true);
 
-      const respuesta = await fetch(`http://localhost:4000/api/auth/${ruta}`, {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const respuesta = await fetch(`${API_BASE}/api/auth/${ruta}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos),
@@ -50,28 +45,24 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
         return;
       }
 
-      // Éxito: guarda sesión y ejecuta onLogin
       guardarSesionEnLocalStorage(resultado.token, resultado.usuario);
       alert(resultado.mensaje || "Sesión iniciada correctamente.");
       onLogin(resultado.usuario);
     } catch (error) {
       alert("No se pudo conectar con el servidor.");
     } finally {
-      setCargando(false); // Finaliza estado de carga
+      setCargando(false);
     }
   };
 
-  // 🖼️ Render del componente
   return (
     <div className="login-wrapper">
       <div className="login-form-container">
-        {/* 🧾 Sección del formulario */}
         <div className="form-section">
           <div className="avatar-circle">A</div>
           <h2>{esRegistro ? "Registro" : "INICIAR SESIÓN"}</h2>
 
           <form onSubmit={manejarEnvio}>
-            {/* Campo de email */}
             <div className="input-group">
               <FaEnvelope />
               <input
@@ -83,7 +74,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               />
             </div>
 
-            {/* Campo de nombre (solo en modo registro) */}
             {esRegistro && (
               <div className="input-group">
                 <FaUser />
@@ -97,7 +87,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               </div>
             )}
 
-            {/* Campo de contraseña */}
             <div className="input-group">
               <FaLock />
               <input
@@ -109,7 +98,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               />
             </div>
 
-            {/* Botón de enviar */}
             <button type="submit" disabled={cargando}>
               {cargando
                 ? esRegistro
@@ -121,7 +109,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          {/* Enlace para alternar entre login y registro */}
           <p onClick={() => setEsRegistro(!esRegistro)} className="switch-link">
             {esRegistro
               ? "¿Ya tienes cuenta? Inicia sesión"
@@ -129,7 +116,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
           </p>
         </div>
 
-        {/* 🌐 Sección adicional (puede contener una marca, imagen, etc.) */}
         <div className="info-section">
           <div className="marca-login"></div>
         </div>
