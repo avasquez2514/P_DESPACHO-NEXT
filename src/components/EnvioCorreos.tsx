@@ -1,349 +1,176 @@
 "use client";
 
+// Importaciones necesarias
 import React, { useEffect, useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import "../styles/aplicativos.css";
-import Modal from "./Modal";
+import "../styles/envioCorreos.css";
 
-// ✅ Interfaces de datos
-interface Aplicativo {
-  id: number;
-  nombre: string;
-  url: string;
-  categoria: string;
+// ✅ Propiedades opcionales del componente
+interface EnvioCorreosProps {
+  tipo?: "envioInicio" | "envioCierre" | "envioApertura";
 }
 
-interface NuevoAplicativo {
-  nombre: string;
-  url: string;
-  categoria: string;
-}
+// ✅ Componente principal
+const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo = "envioInicio" }) => {
+  // 📥 Estados para campos del correo
+  const [para, setPara] = useState<string>("");
+  const [cc, setCc] = useState<string>("");
+  const [asunto, setAsunto] = useState<string>("");
+  const [mensaje, setMensaje] = useState<string>("");
+  const [titulo, setTitulo] = useState<string>("");
 
-// ✅ URL base desde variable de entorno o fallback a localhost
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/aplicativos";
+  // 📆 Estados para fechas
+  const [fechaHoyGuiones, setFechaHoyGuiones] = useState<string>("");
+  const [fechaHoyGuionesBajo, setFechaHoyGuionesBajo] = useState<string>("");
+  const [fechaMananaGuiones, setFechaMananaGuiones] = useState<string>("");
+  const [fechaMananaGuionesBajo, setFechaMananaGuionesBajo] = useState<string>("");
 
-const Aplicativos: React.FC = () => {
-  const [usuario, setUsuario] = useState<any>({});
-  const [token, setToken] = useState<string>("");
-
-  const [aplicativos, setAplicativos] = useState<Aplicativo[]>([]);
-  const [nuevo, setNuevo] = useState<NuevoAplicativo>({
-    nombre: "",
-    url: "",
-    categoria: "",
-  });
-  const [categoriasDisponibles, setCategoriasDisponibles] = useState<string[]>(
-    []
-  );
-  const [otraCategoria, setOtraCategoria] = useState("");
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editando, setEditando] = useState(false);
-  const [editandoId, setEditandoId] = useState<number | null>(null);
-  const [modoModal, setModoModal] = useState<"aplicativo" | "categoria">(
-    "aplicativo"
-  );
-
-  // ✅ Obtener usuario y token desde localStorage
+  // 🗓️ Al montar el componente, genera las fechas actual y de mañana en distintos formatos
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("usuario");
-      const storedToken = localStorage.getItem("token");
+    const hoy = new Date();
+    const manana = new Date();
+    manana.setDate(hoy.getDate() + 1);
 
-      if (storedUser) setUsuario(JSON.parse(storedUser));
-      if (storedToken) setToken(storedToken);
-    }
+    // Ej: 18-07-2025
+    const formatGuiones = (date: Date) => {
+      const d = String(date.getDate()).padStart(2, "0");
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const y = date.getFullYear();
+      return `${d}-${m}-${y}`;
+    };
+
+    // Ej: 2025_07_18
+    const formatGuionesBajo = (date: Date) => {
+      const d = String(date.getDate()).padStart(2, "0");
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const y = date.getFullYear();
+      return `${y}_${m}_${d}`;
+    };
+
+    setFechaHoyGuiones(formatGuiones(hoy));
+    setFechaHoyGuionesBajo(formatGuionesBajo(hoy));
+    setFechaMananaGuiones(formatGuiones(manana));
+    setFechaMananaGuionesBajo(formatGuionesBajo(manana));
   }, []);
 
-  // 📥 Cargar aplicativos cuando el usuario esté disponible
+  // 🧠 Actualiza el título dinámicamente según el tipo de envío
   useEffect(() => {
-    if (usuario.id) {
-      fetchAplicativos();
+    switch (tipo) {
+      case "envioInicio":
+        setTitulo("📤 Envío de Correos - Inicio");
+        break;
+      case "envioCierre":
+        setTitulo("📤 Envío de Correos - Cierre");
+        break;
+      case "envioApertura":
+        setTitulo("📤 Envío de Correos - Apertura");
+        break;
+      default:
+        setTitulo("📤 Envío de Correos");
     }
-  }, [usuario]);
+  }, [tipo]);
 
-  const fetchAplicativos = async () => {
-    try {
-      const res = await fetch(`${API_URL}?usuario_id=${usuario.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  // 📨 Lógica para generar automáticamente el asunto y el mensaje
+  useEffect(() => {
+    if (!fechaHoyGuiones || !fechaHoyGuionesBajo || !fechaMananaGuiones || !fechaMananaGuionesBajo) return;
 
-      const data: Aplicativo[] = await res.json();
-      setAplicativos(data);
+    if (tipo === "envioApertura") {
+      setAsunto(`Asignación Nacional ${fechaMananaGuiones} Logística de Campo B2B - EIA`);
+      setMensaje(
+        `Buen día,
 
-      const categorias = [...new Set(data.map((app) => app.categoria))];
-      setCategoriasDisponibles(categorias);
+Se anexa tabla con la apertura de despacho reparación con la Asignación Nacional ${fechaMananaGuiones}
 
-      if (!categoriaSeleccionada && categorias.length > 0) {
-        setCategoriaSeleccionada(categorias[0]);
-      }
-    } catch (error) {
-      console.error("❌ Error al cargar:", error);
-    }
-  };
-
-  const agregarAplicativo = async () => {
-    if (!nuevo.nombre || !nuevo.url || !nuevo.categoria) {
-      return alert("Completa todos los campos");
+En las zonas donde falte completar la ratio de órdenes a los técnicos y tecnólogos en el transcurso de la mañana se les estarán asignando las demás órdenes.`
+      );
     }
 
-    try {
-      await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ ...nuevo, usuario_id: usuario.id }),
-      });
+    if (tipo === "envioCierre") {
+      setAsunto(`[Mesa de Despacho] – Informe diario de actualización día de hoy_ ${fechaHoyGuionesBajo}_EIA`);
+      setMensaje(
+        `Cordial saludo.
 
-      resetFormulario();
-      fetchAplicativos();
-    } catch (error) {
-      console.error("❌ Error al agregar:", error);
+Nos permitimos anexar la programación del día de hoy ${fechaHoyGuionesBajo} debidamente actualizado (estados). De igual manera ya se encuentra disponible en la ruta compartida.
+
+Cualquier inquietud, quedamos atentos.`
+      );
     }
-  };
 
-  const guardarEdicion = async () => {
-    try {
-      await fetch(`${API_URL}/${editandoId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ ...nuevo, usuario_id: usuario.id }),
-      });
+    if (tipo === "envioInicio") {
+      setAsunto(`[Mesa de Despacho] – Informe diario de programación_${fechaMananaGuionesBajo}_ EIA`);
+      setMensaje(
+        `Cordial saludo,
 
-      resetFormulario();
-      fetchAplicativos();
-    } catch (error) {
-      console.error("❌ Error al editar:", error);
+Nos permitimos anexar la programación para el día de mañana ${fechaMananaGuionesBajo}. De igual manera ya se encuentra disponible en la ruta compartida.
+
+Cualquier inquietud, quedamos atentos.`
+      );
     }
+  }, [tipo, fechaHoyGuiones, fechaHoyGuionesBajo, fechaMananaGuiones, fechaMananaGuionesBajo]);
+
+  // 📋 Copiar un solo campo al portapapeles
+  const copiarTexto = (texto: string) => navigator.clipboard.writeText(texto);
+
+  // 📋 Copiar todo el contenido del correo al portapapeles
+  const copiarTodo = () => {
+    const textoCompleto = `Para:\n${para}\n\nCC:\n${cc}\n\nAsunto:\n${asunto}\n\n${mensaje}`;
+    navigator.clipboard.writeText(textoCompleto);
   };
 
-  const eliminarAplicativo = async (id: number) => {
-    if (!window.confirm("¿Eliminar este aplicativo?")) return;
-
-    try {
-      await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      fetchAplicativos();
-    } catch (error) {
-      console.error("❌ Error al eliminar:", error);
-    }
+  // 💾 Guardar en localStorage
+  const guardarTodo = () => {
+    const data = { para, cc, asunto, mensaje };
+    localStorage.setItem(`correos_${tipo}`, JSON.stringify(data));
+    alert("Información guardada");
   };
-
-  const eliminarCategoria = (categoria: string) => {
-    const confirmacion = window.confirm(
-      `¿Eliminar la categoría "${categoria}" y todos sus aplicativos?`
-    );
-    if (!confirmacion) return;
-
-    const nuevosApps = aplicativos.filter((app) => app.categoria !== categoria);
-    setAplicativos(nuevosApps);
-
-    const nuevasCategorias = categoriasDisponibles.filter(
-      (cat) => cat !== categoria
-    );
-    setCategoriasDisponibles(nuevasCategorias);
-
-    if (categoriaSeleccionada === categoria) {
-      setCategoriaSeleccionada(nuevasCategorias[0] || "");
-    }
-  };
-
-  const abrirEditar = (app: Aplicativo) => {
-    setNuevo({
-      nombre: app.nombre,
-      url: app.url,
-      categoria: app.categoria,
-    });
-    setEditando(true);
-    setEditandoId(app.id);
-    setModoModal("aplicativo");
-    setModalOpen(true);
-  };
-
-  const abrirModalAplicativo = () => {
-    setModoModal("aplicativo");
-    setNuevo({ nombre: "", url: "", categoria: "" });
-    setEditando(false);
-    setEditandoId(null);
-    setModalOpen(true);
-  };
-
-  const abrirModalCategoria = () => {
-    setModoModal("categoria");
-    setOtraCategoria("");
-    setModalOpen(true);
-  };
-
-  const resetFormulario = () => {
-    setNuevo({ nombre: "", url: "", categoria: "" });
-    setOtraCategoria("");
-    setModalOpen(false);
-    setEditando(false);
-    setEditandoId(null);
-  };
-
-  const agrupados = aplicativos.reduce(
-    (acc: Record<string, Aplicativo[]>, app) => {
-      const cat = app.categoria || "Sin categoría";
-      if (!acc[cat]) acc[cat] = [];
-      acc[cat].push(app);
-      return acc;
-    },
-    {}
-  );
 
   return (
-    <div className="aplicativos-container">
-      <div className="panel-categorias">
-        <h3 className="letra">CATEGORIAS</h3>
+    <div className="envio-container">
+      <h2 className="envio-titulo">{titulo}</h2>
 
-        {categoriasDisponibles.map((cat) => (
-          <div key={cat} className="categoria-opcion">
-            <button
-              className={
-                cat === categoriaSeleccionada
-                  ? "categoria-btn activa"
-                  : "categoria-btn"
-              }
-              onClick={() => setCategoriaSeleccionada(cat)}
-            >
-              {cat}
-              <span className="contador">{agrupados[cat]?.length ?? 0}</span>
-            </button>
-            <button
-              className="btn-eliminar-categoria"
-              title="Eliminar categoría"
-              onClick={() => eliminarCategoria(cat)}
-            >
-              ❌
-            </button>
-          </div>
-        ))}
+      <label className="envio-label">Para:</label>
+      <textarea
+        className="envio-textarea"
+        value={para}
+        onChange={(e) => setPara(e.target.value)}
+        placeholder="Direcciones de correo para..."
+      />
+      <button className="btn-mini" onClick={() => copiarTexto(para)}>Copiar Para</button>
 
-        <button className="plantilla-button copy" onClick={abrirModalCategoria}>
-          + Agregar Categoría
-        </button>
+      <label className="envio-label">CC:</label>
+      <textarea
+        className="envio-textarea"
+        value={cc}
+        onChange={(e) => setCc(e.target.value)}
+        placeholder="Direcciones en copia..."
+      />
+      <button className="btn-mini" onClick={() => copiarTexto(cc)}>Copiar CC</button>
+
+      <label className="envio-label">Asunto:</label>
+      <input
+        className="envio-input"
+        type="text"
+        value={asunto}
+        onChange={(e) => setAsunto(e.target.value)}
+        placeholder="Asunto del correo..."
+      />
+      <button className="btn-mini" onClick={() => copiarTexto(asunto)}>Copiar Asunto</button>
+
+      <label className="envio-label">Mensaje:</label>
+      <textarea
+        className="envio-textarea"
+        value={mensaje}
+        onChange={(e) => setMensaje(e.target.value)}
+        placeholder="Cuerpo del mensaje..."
+        style={{ minHeight: "150px" }}
+      />
+      <button className="btn-mini" onClick={() => copiarTexto(mensaje)}>Copiar Mensaje</button>
+
+      <div className="envio-botones">
+        <button className="btn" onClick={copiarTodo}>📋 Copiar Todo</button>
+        <button className="btn" onClick={guardarTodo}>💾 Guardar</button>
       </div>
-
-      <div className="contenido-aplicativos">
-        <h1 className="titulo">{categoriaSeleccionada}</h1>
-
-        <div className="lista-aplicativos">
-          {(agrupados[categoriaSeleccionada] || []).map((app) => (
-            <div key={app.id} className="item-aplicativo">
-              <a href={app.url} target="_blank" rel="noreferrer">
-                <img
-                  src={`${new URL(app.url).origin}/favicon.ico`}
-                  alt={`Logo de ${app.nombre}`}
-                  width={40}
-                  height={40}
-                  className="logo-aplicativo"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/icono-app.png";
-                  }}
-                />
-              </a>
-              <span className="nombre-app">{app.nombre}</span>
-
-              <div className="acciones">
-                <button className="btn-editar" onClick={() => abrirEditar(app)}>
-                  ✏️
-                </button>
-                <button
-                  className="btn-eliminar"
-                  onClick={() => eliminarAplicativo(app.id)}
-                >
-                  🗑️
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button className="plantilla-button copy" onClick={abrirModalAplicativo}>
-          <FaPlus style={{ marginRight: 6 }} />
-          Agregar Aplicativo
-        </button>
-      </div>
-
-      <Modal isOpen={modalOpen} onClose={resetFormulario}>
-        {modoModal === "aplicativo" ? (
-          <>
-            <h2>{editando ? "Editar Aplicativo" : "Agregar Aplicativo"}</h2>
-            <label>Nombre</label>
-            <input
-              type="text"
-              value={nuevo.nombre}
-              onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })}
-              placeholder="Nombre del aplicativo"
-            />
-            <label>URL</label>
-            <input
-              type="text"
-              value={nuevo.url}
-              onChange={(e) => setNuevo({ ...nuevo, url: e.target.value })}
-              placeholder="https://..."
-            />
-            <label>Categoría</label>
-            <select
-              value={nuevo.categoria}
-              onChange={(e) =>
-                setNuevo({ ...nuevo, categoria: e.target.value })
-              }
-            >
-              <option value="">Selecciona categoría</option>
-              {categoriasDisponibles.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-
-            <button
-              className="plantilla-button copy"
-              onClick={editando ? guardarEdicion : agregarAplicativo}
-            >
-              💾 {editando ? "Guardar Cambios" : "Guardar"}
-            </button>
-          </>
-        ) : (
-          <>
-            <h2>Nueva Categoría</h2>
-            <label>Nombre de la categoría</label>
-            <input
-              type="text"
-              value={otraCategoria}
-              onChange={(e) => setOtraCategoria(e.target.value)}
-              placeholder="Ej: Utilidades"
-            />
-            <button
-              className="plantilla-button copy"
-              onClick={() => {
-                if (!otraCategoria) return alert("Ingresa un nombre");
-                if (!categoriasDisponibles.includes(otraCategoria)) {
-                  setCategoriasDisponibles((prev) => [...prev, otraCategoria]);
-                }
-                setCategoriaSeleccionada(otraCategoria);
-                setModalOpen(false);
-              }}
-            >
-              💾 Guardar Categoría
-            </button>
-          </>
-        )}
-      </Modal>
     </div>
   );
 };
 
-export default Aplicativos;
+export default EnvioCorreos;
