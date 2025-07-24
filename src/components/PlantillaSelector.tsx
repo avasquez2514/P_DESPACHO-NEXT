@@ -1,44 +1,32 @@
-"use client"; // Este componente se ejecuta en el cliente (Next.js)
+"use client";
 
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { FaTrash } from "react-icons/fa"; // Icono para eliminar
+import { FaTrash } from "react-icons/fa";
 import "../styles/plantillas.css";
-import Modal from "./Modal"; // Componente modal reutilizable
+import Modal from "./Modal";
 
-// Tipo para una plantilla cargada desde la API
+// Tipos
 interface Plantilla {
   id: string;
   notaPublica: string;
   notaInterna: string;
 }
 
-// Props esperadas por el componente
 interface PlantillaSelectorProps {
-  torre: string;                    // Torre actual (para personalizar encabezados)
-  onSelect: (texto: string) => void; // Función que devuelve el texto seleccionado
+  torre: string;
+  onSelect: (texto: string) => void;
 }
 
 const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }) => {
-  // Estado que contiene todas las plantillas organizadas por novedad
   const [plantillas, setPlantillas] = useState<Record<string, Plantilla>>({});
-  
-  // Novedad seleccionada en el dropdown
-  const [notaSeleccionada, setNotaSeleccionada] = useState<string>("");
-
-  // Tipo de nota activa: pública o interna
+  const [notaSeleccionada, setNotaSeleccionada] = useState("");
   const [tipoNota, setTipoNota] = useState<"publica" | "interna">("publica");
+  const [textoNota, setTextoNota] = useState("");
+  const [textoModificado, setTextoModificado] = useState(false);
 
-  // Contenido mostrado en el textarea
-  const [textoNota, setTextoNota] = useState<string>("");
-
-  // Bandera para saber si el usuario modificó el texto manualmente
-  const [textoModificado, setTextoModificado] = useState<boolean>(false);
-
-  // Estados para controlar el modal
-  const [mostrarModal, setMostrarModal] = useState<boolean>(false);
+  const [mostrarModal, setMostrarModal] = useState(false);
   const [modoModal, setModoModal] = useState<"agregar" | "modificar">("agregar");
 
-  // Datos del formulario del modal
   const [formData, setFormData] = useState({
     novedad: "",
     nota_publica: "",
@@ -47,9 +35,7 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
 
   const API = `${process.env.NEXT_PUBLIC_API_URL}/api/notas`;
 
-  /**
-   * Carga las plantillas del backend según el usuario autenticado.
-   */
+  // Cargar plantillas desde la API
   const cargarPlantillas = async () => {
     const token = localStorage.getItem("token");
     const usuarioRaw = localStorage.getItem("usuario");
@@ -60,11 +46,9 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
       const res = await fetch(`${API}/${usuario.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await res.json();
-      const agrupadas: Record<string, Plantilla> = {};
 
-      // Agrupamos las plantillas que no son "plantilla adicional"
+      const agrupadas: Record<string, Plantilla> = {};
       data.forEach((row: any) => {
         if (!row.plantilla) {
           const novedad = row.novedad || "Sin título";
@@ -78,66 +62,53 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
 
       setPlantillas(agrupadas);
     } catch (error) {
-      console.error("Error cargando plantillas:", error);
+      console.error("Error al cargar plantillas:", error);
     }
   };
 
-  // Al cargar el componente
   useEffect(() => {
     cargarPlantillas();
   }, []);
 
-  // Cada vez que cambia el tipo o novedad, se actualiza el contenido
   useEffect(() => {
     if (notaSeleccionada && plantillas[notaSeleccionada] && !textoModificado) {
       const encabezado = `Gestión-MOC-Torre ${torre}:`;
-      const nota =
-        tipoNota === "publica"
-          ? plantillas[notaSeleccionada].notaPublica
-          : plantillas[notaSeleccionada].notaInterna;
-      const textoCompleto = tipoNota === "publica" ? nota : `${encabezado}\n\n${nota}`;
-
-      setTextoNota(textoCompleto);
-      onSelect(textoCompleto);
+      const nota = tipoNota === "publica"
+        ? plantillas[notaSeleccionada].notaPublica
+        : `${encabezado}\n\n${plantillas[notaSeleccionada].notaInterna}`;
+      setTextoNota(nota);
+      onSelect(nota);
     }
-  }, [tipoNota, notaSeleccionada, plantillas, torre, onSelect, textoModificado]);
+  }, [notaSeleccionada, tipoNota, plantillas, torre, textoModificado, onSelect]);
 
-  // Maneja el cambio de novedad en el <select>
   const handleNotaChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setNotaSeleccionada(e.target.value);
     setTextoModificado(false);
   };
 
-  // Cambia entre pública o interna
   const handleTipoNotaChange = (tipo: "publica" | "interna") => {
     setTipoNota(tipo);
     setTextoModificado(false);
   };
 
-  // Cambios en el textarea
   const handleTextoChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setTextoNota(e.target.value);
     setTextoModificado(true);
   };
 
-  // Copia el contenido al portapapeles
   const copiarTexto = () => navigator.clipboard.writeText(textoNota);
-
-  // Limpia el texto y notifica al padre
   const limpiarTexto = () => {
     setTextoNota("");
     setTextoModificado(true);
     onSelect("");
   };
 
-  // Abre el modal para agregar plantilla
   const abrirModalAgregar = () => {
     setModoModal("agregar");
     setFormData({ novedad: "", nota_publica: "", nota_interna: "" });
     setMostrarModal(true);
   };
 
-  // Abre el modal para modificar plantilla existente
   const abrirModalModificar = () => {
     if (!notaSeleccionada) return;
     const actual = plantillas[notaSeleccionada];
@@ -150,7 +121,6 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
     setMostrarModal(true);
   };
 
-  // Envía el formulario del modal
   const handleSubmitModal = async () => {
     const token = localStorage.getItem("token");
     const usuarioRaw = localStorage.getItem("usuario");
@@ -192,11 +162,10 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
       setMostrarModal(false);
       cargarPlantillas();
     } catch (error) {
-      console.error("Error en el modal:", error);
+      console.error("Error al guardar/editar:", error);
     }
   };
 
-  // Elimina una plantilla
   const eliminarPlantilla = async () => {
     if (!notaSeleccionada) return;
     const id = plantillas[notaSeleccionada].id;
@@ -216,22 +185,16 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
       onSelect("");
       cargarPlantillas();
     } catch (error) {
-      console.error("Error al eliminar la plantilla:", error);
+      console.error("Error al eliminar:", error);
     }
   };
 
-  // Render del componente principal
   return (
     <div className="plantilla-container">
       <div className="plantilla-card">
         <h2 className="plantilla-title">Selecciona Nota</h2>
 
-        {/* Dropdown de novedades */}
-        <select
-          value={notaSeleccionada}
-          onChange={handleNotaChange}
-          className="plantilla-select"
-        >
+        <select value={notaSeleccionada} onChange={handleNotaChange} className="plantilla-select">
           <option value="">-- Selecciona una nota --</option>
           {Object.keys(plantillas).map((key) => (
             <option key={key} value={key}>
@@ -240,14 +203,12 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
           ))}
         </select>
 
-        {/* Botones de acción */}
         <div className="plantilla-buttons">
           <button className="plantilla-button copy" onClick={abrirModalAgregar}>➕ Agregar</button>
           <button className="plantilla-button copy" onClick={abrirModalModificar}>✏️ Modificar</button>
           <button className="plantilla-button clear" onClick={eliminarPlantilla}>🗑️ Eliminar</button>
         </div>
 
-        {/* Textarea y opciones si hay nota seleccionada */}
         {notaSeleccionada && (
           <>
             <textarea
@@ -280,7 +241,6 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
         )}
       </div>
 
-      {/* Modal para agregar o modificar plantilla */}
       <Modal isOpen={mostrarModal} onClose={() => setMostrarModal(false)}>
         <h2>{modoModal === "agregar" ? "Agregar Plantilla" : "Modificar Plantilla"}</h2>
 
@@ -306,13 +266,12 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
 
         <div className="modal-buttons">
           <button onClick={handleSubmitModal} className="modal-save-button">
-            {modoModal === "agregar" ? "💾Guardar" : "Actualizar"}
+            {modoModal === "agregar" ? "💾 Guardar" : "Actualizar"}
           </button>
 
           {modoModal === "modificar" && (
             <button onClick={eliminarPlantilla} className="modal-delete-button">
-              <FaTrash style={{ marginRight: "8px" }} />
-              Eliminar
+              <FaTrash style={{ marginRight: "8px" }} /> Eliminar
             </button>
           )}
         </div>

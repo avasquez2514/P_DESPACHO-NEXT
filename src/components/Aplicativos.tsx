@@ -5,7 +5,6 @@ import { FaPlus } from "react-icons/fa";
 import "../styles/aplicativos.css";
 import Modal from "./Modal";
 
-// ✅ Interfaces de datos
 interface Aplicativo {
   id: number;
   nombre: string;
@@ -19,18 +18,9 @@ interface NuevoAplicativo {
   categoria: string;
 }
 
-// ✅ URL base de la API
-const API_URL = "http://localhost:4000/api/aplicativos";
+const API = `${process.env.NEXT_PUBLIC_API_URL}/api/aplicativos`;
 
-/**
- * 🎯 Componente principal que gestiona la visualización y administración de aplicativos
- */
 const Aplicativos: React.FC = () => {
-  // 🔐 Datos de sesión del usuario autenticado
-  const usuario = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("usuario") || "{}") : {};
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
-
-  // 🧠 Estados
   const [aplicativos, setAplicativos] = useState<Aplicativo[]>([]);
   const [nuevo, setNuevo] = useState<NuevoAplicativo>({ nombre: "", url: "", categoria: "" });
   const [categoriasDisponibles, setCategoriasDisponibles] = useState<string[]>([]);
@@ -42,44 +32,49 @@ const Aplicativos: React.FC = () => {
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [modoModal, setModoModal] = useState<"aplicativo" | "categoria">("aplicativo");
 
-  // 📥 Cargar aplicativos al iniciar
+  const getUsuario = () => {
+    if (typeof window === "undefined") return null;
+    const raw = localStorage.getItem("usuario");
+    return raw ? JSON.parse(raw) : null;
+  };
+
+  const getToken = () => (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+
   useEffect(() => {
     fetchAplicativos();
   }, []);
 
-  /**
-   * 🔁 Cargar todos los aplicativos desde la API
-   */
   const fetchAplicativos = async () => {
+    const token = getToken();
+    const usuario = getUsuario();
+    if (!token || !usuario?.id) return;
+
     try {
-      const res = await fetch(`${API_URL}?usuario_id=${usuario.id}`, {
+      const res = await fetch(`${API}?usuario_id=${usuario.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data: Aplicativo[] = await res.json();
       setAplicativos(data);
 
-      const categorias = [...new Set(data.map((app) => app.categoria))];
+      const categorias = [...new Set(data.map((a) => a.categoria))];
       setCategoriasDisponibles(categorias);
-
       if (!categoriaSeleccionada && categorias.length > 0) {
         setCategoriaSeleccionada(categorias[0]);
       }
-    } catch (error) {
-      console.error("❌ Error al cargar:", error);
+    } catch (err) {
+      console.error("Error al cargar aplicativos:", err);
     }
   };
 
-  /**
-   * ➕ Agregar nuevo aplicativo
-   */
   const agregarAplicativo = async () => {
-    if (!nuevo.nombre || !nuevo.url || !nuevo.categoria) {
-      return alert("Completa todos los campos");
-    }
+    const token = getToken();
+    const usuario = getUsuario();
+    if (!token || !usuario?.id) return;
+    if (!nuevo.nombre || !nuevo.url || !nuevo.categoria) return alert("Completa todos los campos");
 
     try {
-      await fetch(API_URL, {
+      await fetch(API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,17 +85,18 @@ const Aplicativos: React.FC = () => {
 
       resetFormulario();
       fetchAplicativos();
-    } catch (error) {
-      console.error("❌ Error al agregar:", error);
+    } catch (err) {
+      console.error("Error al agregar:", err);
     }
   };
 
-  /**
-   * ✏️ Guardar cambios al editar un aplicativo
-   */
   const guardarEdicion = async () => {
+    const token = getToken();
+    const usuario = getUsuario();
+    if (!token || !usuario?.id || !editandoId) return;
+
     try {
-      await fetch(`${API_URL}/${editandoId}`, {
+      await fetch(`${API}/${editandoId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -111,105 +107,78 @@ const Aplicativos: React.FC = () => {
 
       resetFormulario();
       fetchAplicativos();
-    } catch (error) {
-      console.error("❌ Error al editar:", error);
+    } catch (err) {
+      console.error("Error al editar:", err);
     }
   };
 
-  /**
-   * 🗑️ Eliminar un aplicativo específico
-   */
   const eliminarAplicativo = async (id: number) => {
+    const token = getToken();
+    if (!token) return;
     if (!window.confirm("¿Eliminar este aplicativo?")) return;
 
     try {
-      await fetch(`${API_URL}/${id}`, {
+      await fetch(`${API}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       fetchAplicativos();
-    } catch (error) {
-      console.error("❌ Error al eliminar:", error);
+    } catch (err) {
+      console.error("Error al eliminar:", err);
     }
   };
 
-  /**
-   * 🧹 Eliminar categoría y sus aplicativos asociados
-   */
-  const eliminarCategoria = (categoria: string) => {
-    const confirmacion = window.confirm(`¿Eliminar la categoría "${categoria}" y todos sus aplicativos?`);
-    if (!confirmacion) return;
-
-    const nuevosApps = aplicativos.filter(app => app.categoria !== categoria);
-    setAplicativos(nuevosApps);
-
-    const nuevasCategorias = categoriasDisponibles.filter(cat => cat !== categoria);
-    setCategoriasDisponibles(nuevasCategorias);
-
-    if (categoriaSeleccionada === categoria) {
-      setCategoriaSeleccionada(nuevasCategorias[0] || "");
+  const eliminarCategoria = (cat: string) => {
+    if (!window.confirm(`¿Eliminar la categoría "${cat}" y todos sus aplicativos?`)) return;
+    setAplicativos(aplicativos.filter((a) => a.categoria !== cat));
+    const nuevas = categoriasDisponibles.filter((c) => c !== cat);
+    setCategoriasDisponibles(nuevas);
+    if (categoriaSeleccionada === cat) {
+      setCategoriaSeleccionada(nuevas[0] || "");
     }
   };
 
-  /**
-   * 🖊️ Abrir el modal para editar un aplicativo
-   */
-  const abrirEditar = (app: Aplicativo) => {
-    setNuevo({ nombre: app.nombre, url: app.url, categoria: app.categoria });
+  const abrirEditar = (a: Aplicativo) => {
+    setNuevo({ nombre: a.nombre, url: a.url, categoria: a.categoria });
     setEditando(true);
-    setEditandoId(app.id);
+    setEditandoId(a.id);
     setModoModal("aplicativo");
     setModalOpen(true);
   };
 
-  /**
-   * 📦 Abrir modal para agregar aplicativo
-   */
   const abrirModalAplicativo = () => {
-    setModoModal("aplicativo");
     setNuevo({ nombre: "", url: "", categoria: "" });
     setEditando(false);
     setEditandoId(null);
+    setModoModal("aplicativo");
     setModalOpen(true);
   };
 
-  /**
-   * ➕ Abrir modal para agregar nueva categoría
-   */
   const abrirModalCategoria = () => {
-    setModoModal("categoria");
     setOtraCategoria("");
+    setModoModal("categoria");
     setModalOpen(true);
   };
 
-  /**
-   * ♻️ Reiniciar formulario/modal
-   */
   const resetFormulario = () => {
     setNuevo({ nombre: "", url: "", categoria: "" });
-    setOtraCategoria("");
-    setModalOpen(false);
     setEditando(false);
     setEditandoId(null);
+    setModalOpen(false);
   };
 
-  /**
-   * 🧠 Agrupar aplicativos por categoría
-   */
-  const agrupados = aplicativos.reduce((acc: Record<string, Aplicativo[]>, app) => {
-    const cat = app.categoria || "Sin categoría";
+  const agrupados = aplicativos.reduce((acc: Record<string, Aplicativo[]>, a) => {
+    const cat = a.categoria || "Sin categoría";
     if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(app);
+    acc[cat].push(a);
     return acc;
   }, {});
 
   return (
     <div className="aplicativos-container">
-      {/* 📂 Panel lateral de categorías */}
       <div className="panel-categorias">
         <h3 className="letra">CATEGORIAS</h3>
-
         {categoriasDisponibles.map((cat) => (
           <div key={cat} className="categoria-opcion">
             <button
@@ -217,34 +186,23 @@ const Aplicativos: React.FC = () => {
               onClick={() => setCategoriaSeleccionada(cat)}
             >
               {cat}
-              <span className="contador">{agrupados[cat]?.length ?? 0}</span>
+              <span className="contador">{agrupados[cat]?.length || 0}</span>
             </button>
-            <button
-              className="btn-eliminar-categoria"
-              title="Eliminar categoría"
-              onClick={() => eliminarCategoria(cat)}
-            >
-              ❌
-            </button>
+            <button className="btn-eliminar-categoria" onClick={() => eliminarCategoria(cat)}>❌</button>
           </div>
         ))}
-
-        <button className="plantilla-button copy" onClick={abrirModalCategoria}>
-          + Agregar Categoría
-        </button>
+        <button className="plantilla-button copy" onClick={abrirModalCategoria}>+ Agregar Categoría</button>
       </div>
 
-      {/* 🖥️ Vista de aplicativos */}
       <div className="contenido-aplicativos">
         <h1 className="titulo">{categoriaSeleccionada}</h1>
-
         <div className="lista-aplicativos">
-          {(agrupados[categoriaSeleccionada] || []).map((app) => (
-            <div key={app.id} className="item-aplicativo">
-              <a href={app.url} target="_blank" rel="noreferrer">
+          {(agrupados[categoriaSeleccionada] || []).map((a) => (
+            <div key={a.id} className="item-aplicativo">
+              <a href={a.url} target="_blank" rel="noreferrer">
                 <img
-                  src={`${new URL(app.url).origin}/favicon.ico`}
-                  alt={`Logo de ${app.nombre}`}
+                  src={`${new URL(a.url).origin}/favicon.ico`}
+                  alt={`Logo de ${a.nombre}`}
                   width={40}
                   height={40}
                   className="logo-aplicativo"
@@ -253,52 +211,35 @@ const Aplicativos: React.FC = () => {
                   }}
                 />
               </a>
-              <span className="nombre-app">{app.nombre}</span>
-
+              <span className="nombre-app">{a.nombre}</span>
               <div className="acciones">
-                <button className="btn-editar" onClick={() => abrirEditar(app)}>✏️</button>
-                <button className="btn-eliminar" onClick={() => eliminarAplicativo(app.id)}>🗑️</button>
+                <button className="btn-editar" onClick={() => abrirEditar(a)}>✏️</button>
+                <button className="btn-eliminar" onClick={() => eliminarAplicativo(a.id)}>🗑️</button>
               </div>
             </div>
           ))}
         </div>
-
         <button className="plantilla-button copy" onClick={abrirModalAplicativo}>
           <FaPlus style={{ marginRight: 6 }} />
           Agregar Aplicativo
         </button>
       </div>
 
-      {/* 📦 Modal para aplicativos o categorías */}
       <Modal isOpen={modalOpen} onClose={resetFormulario}>
         {modoModal === "aplicativo" ? (
           <>
             <h2>{editando ? "Editar Aplicativo" : "Agregar Aplicativo"}</h2>
             <label>Nombre</label>
-            <input
-              type="text"
-              value={nuevo.nombre}
-              onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })}
-              placeholder="Nombre del aplicativo"
-            />
+            <input type="text" value={nuevo.nombre} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} />
             <label>URL</label>
-            <input
-              type="text"
-              value={nuevo.url}
-              onChange={(e) => setNuevo({ ...nuevo, url: e.target.value })}
-              placeholder="https://..."
-            />
+            <input type="text" value={nuevo.url} onChange={(e) => setNuevo({ ...nuevo, url: e.target.value })} />
             <label>Categoría</label>
-            <select
-              value={nuevo.categoria}
-              onChange={(e) => setNuevo({ ...nuevo, categoria: e.target.value })}
-            >
+            <select value={nuevo.categoria} onChange={(e) => setNuevo({ ...nuevo, categoria: e.target.value })}>
               <option value="">Selecciona categoría</option>
               {categoriasDisponibles.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
-
             <button className="plantilla-button copy" onClick={editando ? guardarEdicion : agregarAplicativo}>
               💾 {editando ? "Guardar Cambios" : "Guardar"}
             </button>
