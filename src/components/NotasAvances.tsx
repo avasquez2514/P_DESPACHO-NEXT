@@ -1,21 +1,18 @@
-"use client"; // 🧠 Indica que este componente debe ejecutarse en el cliente (Next.js)
+"use client";
 
 import React, { useCallback, useEffect, useState } from "react";
 import "../styles/notasAvances.css";
 import Modal from "./Modal";
 
-// 📘 Interfaz de una nota
 interface Nota {
   id: string;
   texto: string;
 }
 
-// 📘 Props del componente
 interface NotasAvancesProps {
   torre: string;
 }
 
-// ✅ URL base del backend desde variable de entorno
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
@@ -35,7 +32,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     if (!usuario_id || !token) return;
 
     try {
-      const res = await fetch(`${API_URL}/notas/avances/${usuario_id}`, {
+      const res = await fetch(`${API_URL}/api/notas/avances/${usuario_id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -56,8 +53,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
   }, [cargarNotas]);
 
   const copiarNota = (texto: string) => {
-    navigator.clipboard.writeText(prefijo + texto)
-      .catch((err) => console.error("Error al copiar: ", err));
+    navigator.clipboard.writeText(prefijo + texto).catch((err) => console.error("Error al copiar: ", err));
   };
 
   const eliminarNota = async (id: string) => {
@@ -65,7 +61,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     if (!window.confirm("¿Deseas eliminar esta nota de avances?")) return;
 
     try {
-      await fetch(`${API_URL}/notas/avances/${id}`, {
+      await fetch(`${API_URL}/api/notas/avances/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -93,7 +89,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
 
     try {
       if (modo === "agregar") {
-        await fetch(`${API_URL}/notas`, {
+        await fetch(`${API_URL}/api/notas`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -106,7 +102,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
           }),
         });
       } else if (modo === "modificar" && notaActual) {
-        await fetch(`${API_URL}/notas/${notaActual.id}`, {
+        await fetch(`${API_URL}/api/notas/${notaActual.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -136,25 +132,13 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
           <div key={nota.id} className="nota-item">
             <p className="nota-texto">{nota.texto}</p>
             <div className="nota-botones">
-              <button
-                onClick={() => copiarNota(nota.texto)}
-                className="copy"
-                title="Copiar"
-              >
+              <button onClick={() => copiarNota(nota.texto)} className="copy" title="Copiar">
                 📋
               </button>
-              <button
-                onClick={() => abrirModalModificar(nota)}
-                className="edit"
-                title="Modificar"
-              >
+              <button onClick={() => abrirModalModificar(nota)} className="edit" title="Modificar">
                 ✏️
               </button>
-              <button
-                onClick={() => eliminarNota(nota.id)}
-                className="delete"
-                title="Eliminar"
-              >
+              <button onClick={() => eliminarNota(nota.id)} className="delete" title="Eliminar">
                 🗑️
               </button>
             </div>
