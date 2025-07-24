@@ -1,36 +1,30 @@
 "use client";
 
-// Importaciones necesarias
 import React, { useEffect, useState } from "react";
 import "../styles/envioCorreos.css";
 
-// ✅ Propiedades opcionales del componente
+// ✅ Interfaz de props explícita
 interface EnvioCorreosProps {
-  tipo?: "envioInicio" | "envioCierre" | "envioApertura";
+  tipo: "envioInicio" | "envioCierre" | "envioApertura";
 }
 
-// ✅ Componente principal
-const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo = "envioInicio" }) => {
-  // 📥 Estados para campos del correo
-  const [para, setPara] = useState<string>("");
-  const [cc, setCc] = useState<string>("");
-  const [asunto, setAsunto] = useState<string>("");
-  const [mensaje, setMensaje] = useState<string>("");
-  const [titulo, setTitulo] = useState<string>("");
+const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo }) => {
+  const [para, setPara] = useState("");
+  const [cc, setCc] = useState("");
+  const [asunto, setAsunto] = useState("");
+  const [mensaje, setMensaje] = useState("");
+  const [titulo, setTitulo] = useState("");
 
-  // 📆 Estados para fechas
-  const [fechaHoyGuiones, setFechaHoyGuiones] = useState<string>("");
-  const [fechaHoyGuionesBajo, setFechaHoyGuionesBajo] = useState<string>("");
-  const [fechaMananaGuiones, setFechaMananaGuiones] = useState<string>("");
-  const [fechaMananaGuionesBajo, setFechaMananaGuionesBajo] = useState<string>("");
+  const [fechaHoyGuiones, setFechaHoyGuiones] = useState("");
+  const [fechaHoyGuionesBajo, setFechaHoyGuionesBajo] = useState("");
+  const [fechaMananaGuiones, setFechaMananaGuiones] = useState("");
+  const [fechaMananaGuionesBajo, setFechaMananaGuionesBajo] = useState("");
 
-  // 🗓️ Al montar el componente, genera las fechas actual y de mañana en distintos formatos
   useEffect(() => {
     const hoy = new Date();
     const manana = new Date();
     manana.setDate(hoy.getDate() + 1);
 
-    // Ej: 18-07-2025
     const formatGuiones = (date: Date) => {
       const d = String(date.getDate()).padStart(2, "0");
       const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -38,7 +32,6 @@ const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo = "envioInicio" }) => 
       return `${d}-${m}-${y}`;
     };
 
-    // Ej: 2025_07_18
     const formatGuionesBajo = (date: Date) => {
       const d = String(date.getDate()).padStart(2, "0");
       const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -52,7 +45,6 @@ const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo = "envioInicio" }) => 
     setFechaMananaGuionesBajo(formatGuionesBajo(manana));
   }, []);
 
-  // 🧠 Actualiza el título dinámicamente según el tipo de envío
   useEffect(() => {
     switch (tipo) {
       case "envioInicio":
@@ -64,59 +56,47 @@ const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo = "envioInicio" }) => 
       case "envioApertura":
         setTitulo("📤 Envío de Correos - Apertura");
         break;
-      default:
-        setTitulo("📤 Envío de Correos");
     }
   }, [tipo]);
 
-  // 📨 Lógica para generar automáticamente el asunto y el mensaje
   useEffect(() => {
     if (!fechaHoyGuiones || !fechaHoyGuionesBajo || !fechaMananaGuiones || !fechaMananaGuionesBajo) return;
 
-    if (tipo === "envioApertura") {
-      setAsunto(`Asignación Nacional ${fechaMananaGuiones} Logística de Campo B2B - EIA`);
-      setMensaje(
-        `Buen día,
+    switch (tipo) {
+      case "envioApertura":
+        setAsunto(`Asignación Nacional ${fechaMananaGuiones} Logística de Campo B2B - EIA`);
+        setMensaje(`Buen día,
 
 Se anexa tabla con la apertura de despacho reparación con la Asignación Nacional ${fechaMananaGuiones}
 
-En las zonas donde falte completar la ratio de órdenes a los técnicos y tecnólogos en el transcurso de la mañana se les estarán asignando las demás órdenes.`
-      );
-    }
+En las zonas donde falte completar la ratio de órdenes a los técnicos y tecnólogos en el transcurso de la mañana se les estarán asignando las demás órdenes.`);
+        break;
 
-    if (tipo === "envioCierre") {
-      setAsunto(`[Mesa de Despacho] – Informe diario de actualización día de hoy_ ${fechaHoyGuionesBajo}_EIA`);
-      setMensaje(
-        `Cordial saludo.
+      case "envioCierre":
+        setAsunto(`[Mesa de Despacho] – Informe diario de actualización día de hoy_ ${fechaHoyGuionesBajo}_EIA`);
+        setMensaje(`Cordial saludo.
 
 Nos permitimos anexar la programación del día de hoy ${fechaHoyGuionesBajo} debidamente actualizado (estados). De igual manera ya se encuentra disponible en la ruta compartida.
 
-Cualquier inquietud, quedamos atentos.`
-      );
-    }
+Cualquier inquietud, quedamos atentos.`);
+        break;
 
-    if (tipo === "envioInicio") {
-      setAsunto(`[Mesa de Despacho] – Informe diario de programación_${fechaMananaGuionesBajo}_ EIA`);
-      setMensaje(
-        `Cordial saludo,
+      case "envioInicio":
+        setAsunto(`[Mesa de Despacho] – Informe diario de programación_${fechaMananaGuionesBajo}_ EIA`);
+        setMensaje(`Cordial saludo,
 
 Nos permitimos anexar la programación para el día de mañana ${fechaMananaGuionesBajo}. De igual manera ya se encuentra disponible en la ruta compartida.
 
-Cualquier inquietud, quedamos atentos.`
-      );
+Cualquier inquietud, quedamos atentos.`);
+        break;
     }
   }, [tipo, fechaHoyGuiones, fechaHoyGuionesBajo, fechaMananaGuiones, fechaMananaGuionesBajo]);
 
-  // 📋 Copiar un solo campo al portapapeles
   const copiarTexto = (texto: string) => navigator.clipboard.writeText(texto);
-
-  // 📋 Copiar todo el contenido del correo al portapapeles
   const copiarTodo = () => {
     const textoCompleto = `Para:\n${para}\n\nCC:\n${cc}\n\nAsunto:\n${asunto}\n\n${mensaje}`;
     navigator.clipboard.writeText(textoCompleto);
   };
-
-  // 💾 Guardar en localStorage
   const guardarTodo = () => {
     const data = { para, cc, asunto, mensaje };
     localStorage.setItem(`correos_${tipo}`, JSON.stringify(data));

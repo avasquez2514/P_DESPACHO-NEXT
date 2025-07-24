@@ -1,4 +1,4 @@
-// src/hooks/useNavegacion.js
+// src/hooks/useNavegacion.ts
 import { useState } from "react";
 
 /**
@@ -9,31 +9,17 @@ import { useState } from "react";
  * - control de vista en blanco y modo B2B
  */
 export function useNavegacion() {
-  // Estado del tipo de nota actual (ej. 'NOTAS DE AVANCE', 'DESPACHO B2B')
-  const [tipoNota, setTipoNota] = useState("");
-
-  // Estado de la torre seleccionada (ej. 'ANTIOQUIA', 'VALLE')
-  const [torre, setTorre] = useState("");
-
-  // Si está activa una pantalla blanca temporal mientras se selecciona una opción
-  const [pantallaBlanca, setPantallaBlanca] = useState(false);
-
-  // Si se está trabajando en modo B2B
-  const [modoB2B, setModoB2B] = useState(false);
-
-  // Vista principal actual del sistema (ej. 'inicio', '', 'notas')
-  const [vista, setVista] = useState("inicio");
-
-  // Vista especial activa (ej. 'alarmas', 'envio-correos', 'aplicativos')
-  const [vistaEspecial, setVistaEspecial] = useState("");
+  const [tipoNota, setTipoNota] = useState<string>("");
+  const [torre, setTorre] = useState<string>("");
+  const [pantallaBlanca, setPantallaBlanca] = useState<boolean>(false);
+  const [modoB2B, setModoB2B] = useState<boolean>(false);
+  const [vista, setVista] = useState<string>("inicio");
+  const [vistaEspecial, setVistaEspecial] = useState<string>("");
 
   /**
    * ✅ Maneja la selección del tipo de nota
-   * - Limpia vista especial si la hay
-   * - Si se elige "DESPACHO B2B", activa el modo B2B
-   * - En otros casos, desactiva el modo B2B
    */
-  const handleSelectTipoNota = (nota) => {
+  const handleSelectTipoNota = (nota: string) => {
     setTipoNota(nota);
     setVistaEspecial("");
     setPantallaBlanca(false);
@@ -50,19 +36,16 @@ export function useNavegacion() {
 
   /**
    * ✅ Maneja la selección de una torre
-   * - Guarda el nombre de la torre
-   * - Activa la pantalla blanca (esperando submenú)
    */
-  const handleTorreSeleccionada = (torreSeleccionada) => {
+  const handleTorreSeleccionada = (torreSeleccionada: string) => {
     setTorre(torreSeleccionada);
     setPantallaBlanca(true);
   };
 
   /**
    * ✅ Activa una vista especial (como alarmas, aplicativos, etc.)
-   * - Limpia tipo de nota y pantalla blanca
    */
-  const handleVistaEspecial = (vista) => {
+  const handleVistaEspecial = (vista: string) => {
     setVistaEspecial(vista);
     setTipoNota("");
     setPantallaBlanca(false);
@@ -80,7 +63,6 @@ export function useNavegacion() {
     setPantallaBlanca(false);
   };
 
-  // Exporta todas las variables y funciones necesarias al componente que lo utilice
   return {
     tipoNota,
     torre,
