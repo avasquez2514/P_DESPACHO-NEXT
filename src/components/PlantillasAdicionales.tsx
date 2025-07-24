@@ -8,35 +8,28 @@ import Modal from "./Modal";
 // Interfaz que representa una plantilla adicional
 interface Plantilla {
   id: string;
-  nombre: string; // Nombre o título visible de la plantilla
-  texto: string;  // Contenido del texto de la plantilla
+  nombre: string;
+  texto: string;
 }
 
-const PlantillasAdicionales: React.FC = () => {
-  // Lista de plantillas adicionales obtenidas del backend
+// ✅ Interfaz para props
+interface PlantillasAdicionalesProps {
+  torre: string;
+}
+
+const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) => {
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
-
-  // Estado para mostrar u ocultar el modal
   const [modalOpen, setModalOpen] = useState(false);
-
-  // Estado para saber si se está agregando o editando una plantilla
   const [modo, setModo] = useState<"agregar" | "editar">("agregar");
 
-  // Datos del formulario para agregar o editar
   const [formData, setFormData] = useState<{
     id: string | null;
     nombre: string;
     texto: string;
   }>({ id: null, nombre: "", texto: "" });
 
-  // Ruta base del backend (ajustar si cambias de servidor)
   const API = `${process.env.NEXT_PUBLIC_API_URL}/api/notas`;
 
-  /**
-   * Función para cargar las plantillas del backend.
-   * Filtra las plantillas que solo contienen campo `plantilla`,
-   * excluyendo aquellas que tienen notas públicas, internas o de avances.
-   */
   const cargarPlantillas = async () => {
     const token = localStorage.getItem("token");
     const usuarioRaw = localStorage.getItem("usuario");
@@ -50,7 +43,6 @@ const PlantillasAdicionales: React.FC = () => {
 
       const data = await res.json();
 
-      // Se filtran solo las plantillas puras
       const filtradas = data
         .filter(
           (nota: any) =>
@@ -71,22 +63,16 @@ const PlantillasAdicionales: React.FC = () => {
     }
   };
 
-  // Carga inicial al montar el componente
   useEffect(() => {
     cargarPlantillas();
   }, []);
 
-  /**
-   * Copia el texto de una plantilla al portapapeles.
-   */
   const copiarPlantilla = (texto: string) => {
-    navigator.clipboard.writeText(texto)
-      .catch((err) => console.error("Error al copiar: ", err));
+    navigator.clipboard.writeText(texto).catch((err) =>
+      console.error("Error al copiar: ", err)
+    );
   };
 
-  /**
-   * Elimina una plantilla específica por su ID.
-   */
   const eliminarPlantilla = async (id: string | null) => {
     if (!id) return;
     const token = localStorage.getItem("token");
@@ -99,24 +85,18 @@ const PlantillasAdicionales: React.FC = () => {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      cargarPlantillas(); // Recarga después de eliminar
+      cargarPlantillas();
     } catch (error) {
       console.error("Error al eliminar plantilla:", error);
     }
   };
 
-  /**
-   * Abre el modal para agregar nueva plantilla.
-   */
   const abrirModalAgregar = () => {
     setModo("agregar");
     setFormData({ id: null, nombre: "", texto: "" });
     setModalOpen(true);
   };
 
-  /**
-   * Abre el modal para editar una plantilla existente.
-   */
   const abrirModalEditar = (plantilla: Plantilla) => {
     setModo("editar");
     setFormData({
@@ -127,9 +107,6 @@ const PlantillasAdicionales: React.FC = () => {
     setModalOpen(true);
   };
 
-  /**
-   * Maneja el cambio de los campos del formulario.
-   */
   const manejarCambio = (
     e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
   ) => {
@@ -137,9 +114,6 @@ const PlantillasAdicionales: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  /**
-   * Guarda los datos del formulario: crea o actualiza una plantilla.
-   */
   const guardarPlantilla = async () => {
     const token = localStorage.getItem("token");
     const usuarioRaw = localStorage.getItem("usuario");
@@ -149,7 +123,6 @@ const PlantillasAdicionales: React.FC = () => {
 
     try {
       if (modo === "agregar") {
-        // Crear nueva plantilla
         await fetch(API, {
           method: "POST",
           headers: {
@@ -163,7 +136,6 @@ const PlantillasAdicionales: React.FC = () => {
           }),
         });
       } else if (modo === "editar" && formData.id) {
-        // Modificar plantilla existente
         await fetch(`${API}/${formData.id}`, {
           method: "PUT",
           headers: {
@@ -184,18 +156,15 @@ const PlantillasAdicionales: React.FC = () => {
     }
   };
 
-  // Render principal
   return (
     <div className="plantilla-container">
       <div className="plantilla-card">
         <h2 className="plantilla-title">📄 Plantillas Adicionales</h2>
 
-        {/* Botón para agregar nueva plantilla */}
         <button className="agregar-button" onClick={abrirModalAgregar}>
           ➕ Agregar Plantilla
         </button>
 
-        {/* Lista de plantillas */}
         <div className="plantilla-list">
           {plantillas.map((plantilla) => (
             <div key={plantilla.id} className="plantilla-item">
@@ -203,33 +172,34 @@ const PlantillasAdicionales: React.FC = () => {
                 <h3 className="plantilla-nombre">{plantilla.nombre}</h3>
                 <p className="plantilla-texto">{plantilla.texto}</p>
               </div>
-        <div className="plantilla-buttons">
-          <button
-            className="plantilla-button copy"
-            onClick={() => copiarPlantilla(plantilla.texto)}
-            title="Copiar"
-          >📋Copiar
-          </button>
-          <button
-            className="plantilla-button edit"
-            onClick={() => abrirModalEditar(plantilla)}
-            title="Modificar"
-          >✏️Modificar
-          </button>
-          <button
-            className="plantilla-button clear"
-            onClick={() => eliminarPlantilla(plantilla.id)}
-            title="Eliminar"
-          >🗑️Eliminar
-          </button>
-        </div>
-
+              <div className="plantilla-buttons">
+                <button
+                  className="plantilla-button copy"
+                  onClick={() => copiarPlantilla(plantilla.texto)}
+                  title="Copiar"
+                >
+                  📋 Copiar
+                </button>
+                <button
+                  className="plantilla-button edit"
+                  onClick={() => abrirModalEditar(plantilla)}
+                  title="Modificar"
+                >
+                  ✏️ Modificar
+                </button>
+                <button
+                  className="plantilla-button clear"
+                  onClick={() => eliminarPlantilla(plantilla.id)}
+                  title="Eliminar"
+                >
+                  🗑️ Eliminar
+                </button>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Modal para agregar o editar plantilla */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         <h2>{modo === "agregar" ? "Agregar Plantilla" : "Modificar Plantilla"}</h2>
 
