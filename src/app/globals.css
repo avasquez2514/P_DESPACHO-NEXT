@@ -107,7 +107,7 @@ html, body {
   position: fixed;
   top: 10px;
   right: 20px;
-  background: linear-gradient(to right, #3b82f6, #0e40af);
+  background: linear-gradient(90deg, #3a7eec, #081d4d);
   color: white;
   padding: 10px 15px;
   border-radius: 8px;

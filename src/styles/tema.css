@@ -5,7 +5,7 @@ body {
 }
 
 body.dark-theme {
-  background-color: #121212;
+  background: linear-gradient(to right, #1a1c20a1, #000000ed);
   color: #e5e5e5;
 }
 
