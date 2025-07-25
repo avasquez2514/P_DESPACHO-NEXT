@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import "../styles/envioCorreos.css";
 
-// ✅ Interfaz de props explícita
 interface EnvioCorreosProps {
   tipo: "envioInicio" | "envioCierre" | "envioApertura";
 }
@@ -20,6 +19,23 @@ const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo }) => {
   const [fechaMananaGuiones, setFechaMananaGuiones] = useState("");
   const [fechaMananaGuionesBajo, setFechaMananaGuionesBajo] = useState("");
 
+  // 👉 Cargar datos guardados en localStorage
+  useEffect(() => {
+    const dataGuardada = localStorage.getItem(`correos_${tipo}`);
+    if (dataGuardada) {
+      try {
+        const { para, cc, asunto, mensaje } = JSON.parse(dataGuardada);
+        setPara(para || "");
+        setCc(cc || "");
+        setAsunto(asunto || "");
+        setMensaje(mensaje || "");
+      } catch (e) {
+        console.error("❌ Error cargando datos de localStorage:", e);
+      }
+    }
+  }, [tipo]);
+
+  // 📅 Fechas de hoy y mañana en varios formatos
   useEffect(() => {
     const hoy = new Date();
     const manana = new Date();
@@ -45,6 +61,7 @@ const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo }) => {
     setFechaMananaGuionesBajo(formatGuionesBajo(manana));
   }, []);
 
+  // 🔤 Título del componente
   useEffect(() => {
     switch (tipo) {
       case "envioInicio":
@@ -59,6 +76,7 @@ const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo }) => {
     }
   }, [tipo]);
 
+  // 📝 Contenido predeterminado según el tipo
   useEffect(() => {
     if (!fechaHoyGuiones || !fechaHoyGuionesBajo || !fechaMananaGuiones || !fechaMananaGuionesBajo) return;
 
@@ -92,6 +110,7 @@ Cualquier inquietud, quedamos atentos.`);
     }
   }, [tipo, fechaHoyGuiones, fechaHoyGuionesBajo, fechaMananaGuiones, fechaMananaGuionesBajo]);
 
+  // ✂️ Funciones para copiar y guardar
   const copiarTexto = (texto: string) => navigator.clipboard.writeText(texto);
   const copiarTodo = () => {
     const textoCompleto = `Para:\n${para}\n\nCC:\n${cc}\n\nAsunto:\n${asunto}\n\n${mensaje}`;
