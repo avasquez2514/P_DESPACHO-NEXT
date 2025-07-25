@@ -3,29 +3,25 @@
 import React, { useEffect, useState } from "react";
 import "../styles/alarma.css";
 
-// 🧠 Estructura para cada alarma
 interface AlarmaItem {
   hora: string;
   nombre: string;
   sonido?: string;
 }
 
-// 🎵 Estructura para los sonidos personalizados
 interface SonidoPersonalizado {
   nombre: string;
   url: string;
 }
 
 const Alarma: React.FC = () => {
-  // 🕒 Estados principales
   const [nuevaHora, setNuevaHora] = useState<string>("");
   const [nombreAlarma, setNombreAlarma] = useState<string>("");
-  const [sonidoPredeterminado] = useState<string>("/sonidos/default.mp3");
+  const [sonidoPredeterminado] = useState<string>("/Sonidos/default.mp3");
   const [archivoSonido, setArchivoSonido] = useState<File | null>(null);
-  const [sonidoSeleccionado, setSonidoSeleccionado] = useState<string>("/sonidos/default.mp3");
+  const [sonidoSeleccionado, setSonidoSeleccionado] = useState<string>("/Sonidos/default.mp3");
   const [audioEnReproduccion, setAudioEnReproduccion] = useState<HTMLAudioElement | null>(null);
 
-  // 🎵 Sonidos personalizados guardados
   const [sonidos, setSonidos] = useState<SonidoPersonalizado[]>(() => {
     try {
       const guardados = localStorage.getItem("sonidos");
@@ -35,7 +31,6 @@ const Alarma: React.FC = () => {
     }
   });
 
-  // ⏰ Alarmas programadas
   const [alarmas, setAlarmas] = useState<AlarmaItem[]>(() => {
     try {
       const guardadas = localStorage.getItem("alarmas");
@@ -46,15 +41,12 @@ const Alarma: React.FC = () => {
     }
   });
 
-  // ✅ Controla qué alarmas ya se activaron
   const [activadas, setActivadas] = useState<number[]>([]);
 
-  // 💾 Guarda alarmas en localStorage al cambiar
   useEffect(() => {
     localStorage.setItem("alarmas", JSON.stringify(alarmas));
   }, [alarmas]);
 
-  // 🔇 Detener reproducción
   const detenerAlarma = () => {
     if (audioEnReproduccion) {
       audioEnReproduccion.pause();
@@ -63,19 +55,21 @@ const Alarma: React.FC = () => {
     }
   };
 
-  // 📢 Mostrar alarma en pantalla y reproducir sonido
   const mostrarPantallaAlarma = (alarma: AlarmaItem) => {
     const mensaje = `⏰ ${alarma.nombre || "¡Alarma activada!"} - ${alarma.hora}`;
     const overlay = document.createElement("div");
     overlay.className = "alarma-overlay";
     overlay.innerText = mensaje;
 
-    const audio = new Audio(alarma.sonido || sonidoPredeterminado);
-    audio.loop = true; // 🔁 Hace que suene hasta que lo pares
-    audio.play().catch((e) => console.error("Error reproduciendo sonido:", e));
-    setAudioEnReproduccion(audio); // 💾 guarda audio en estado
+    const sonidoURL = alarma.sonido?.startsWith("blob:") || alarma.sonido?.startsWith("/Sonidos/")
+      ? alarma.sonido
+      : sonidoPredeterminado;
 
-    // ✅ On click: detener audio y eliminar overlay
+    const audio = new Audio(sonidoURL);
+    audio.loop = true;
+    audio.play().catch((e) => console.error("Error reproduciendo sonido:", e));
+    setAudioEnReproduccion(audio);
+
     overlay.addEventListener("click", () => {
       audio.pause();
       audio.currentTime = 0;
@@ -85,7 +79,7 @@ const Alarma: React.FC = () => {
 
     document.body.appendChild(overlay);
   };
-  // ⏳ Verifica cada segundo si alguna alarma debe sonar
+
   useEffect(() => {
     const intervalo = setInterval(() => {
       const ahora = new Date();
@@ -102,11 +96,10 @@ const Alarma: React.FC = () => {
     return () => clearInterval(intervalo);
   }, [alarmas, activadas]);
 
-  // ➕ Agregar nueva alarma
   const agregarAlarma = () => {
     if (!nuevaHora) return;
 
-    let sonidoURL = sonidoSeleccionado || sonidoPredeterminado;
+    let sonidoURL = sonidoSeleccionado;
 
     if (archivoSonido) {
       sonidoURL = URL.createObjectURL(archivoSonido);
@@ -122,16 +115,14 @@ const Alarma: React.FC = () => {
     setNuevaHora("");
     setNombreAlarma("");
     setArchivoSonido(null);
-    setSonidoSeleccionado("/sonidos/default.mp3");
+    setSonidoSeleccionado("/Sonidos/default.mp3");
   };
 
-  // ❌ Eliminar alarma
   const eliminarAlarma = (index: number) => {
     setAlarmas((prev) => prev.filter((_, i) => i !== index));
     setActivadas((prev) => prev.filter((i) => i !== index));
   };
 
-  // 🎧 Agregar un sonido personalizado
   const agregarSonidoPersonalizado = (file: File) => {
     const url = URL.createObjectURL(file);
     const nuevoSonido: SonidoPersonalizado = {
@@ -144,15 +135,13 @@ const Alarma: React.FC = () => {
     localStorage.setItem("sonidos", JSON.stringify(actualizados));
   };
 
-  // 🗑️ Eliminar sonido personalizado
   const eliminarSonidoPersonalizado = (index: number) => {
     const actualizados = sonidos.filter((_, i) => i !== index);
     setSonidos(actualizados);
     localStorage.setItem("sonidos", JSON.stringify(actualizados));
 
-    // Si el sonido eliminado era el seleccionado, volver al predeterminado
     if (sonidoSeleccionado === sonidos[index].url) {
-      setSonidoSeleccionado("/sonidos/default.mp3");
+      setSonidoSeleccionado("/Sonidos/default.mp3");
     }
   };
 
@@ -160,7 +149,6 @@ const Alarma: React.FC = () => {
     <div className="alarma-container">
       <h2 className="alarma-title">⏰ Gestión de Alarmas</h2>
 
-      {/* 🔧 Entrada de hora, nombre y sonido */}
       <div className="alarma-input-container">
         <input
           type="time"
@@ -182,7 +170,7 @@ const Alarma: React.FC = () => {
           onChange={(e) => setSonidoSeleccionado(e.target.value)}
           className="alarma-input"
         >
-          <option value="/sonidos/default.mp3">🔔 Sonido predeterminado</option>
+          <option value="/Sonidos/default.mp3">🔔 Sonido predeterminado</option>
           {sonidos.map((s) => (
             <option key={s.url} value={s.url}>
               🎵 {s.nombre}
@@ -195,7 +183,6 @@ const Alarma: React.FC = () => {
         </button>
       </div>
 
-      {/* 📂 Agregar sonidos personalizados */}
       <div className="alarma-input-container">
         <label>Agregar sonido personalizado:</label>
         <input
@@ -208,7 +195,6 @@ const Alarma: React.FC = () => {
         />
       </div>
 
-      {/* 🎵 Lista de sonidos personalizados con eliminar */}
       {sonidos.length > 0 && (
         <div className="alarma-sonidos-personalizados">
           <h4>🎶 Sonidos personalizados</h4>
@@ -220,7 +206,7 @@ const Alarma: React.FC = () => {
                   onClick={() => eliminarSonidoPersonalizado(index)}
                   className="alarma-eliminar"
                 >
-                  🗑️ 
+                  🗑️
                 </button>
               </li>
             ))}
@@ -228,7 +214,6 @@ const Alarma: React.FC = () => {
         </div>
       )}
 
-      {/* 📅 Lista de alarmas */}
       {alarmas.length === 0 ? (
         <p className="alarma-empty">No hay alarmas programadas.</p>
       ) : (
@@ -238,10 +223,7 @@ const Alarma: React.FC = () => {
               <span className="alarma-hora">
                 🕒 {alarma.hora} {alarma.nombre && `- ${alarma.nombre}`}
               </span>
-              <button
-                onClick={() => eliminarAlarma(index)}
-                className="alarma-eliminar"
-              >
+              <button onClick={() => eliminarAlarma(index)} className="alarma-eliminar">
                 Eliminar
               </button>
             </li>
