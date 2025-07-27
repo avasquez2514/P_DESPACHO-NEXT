@@ -2,14 +2,20 @@
 
 import React, { useState, FormEvent } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useRouter } from "next/navigation"; // ✅ para redireccionar
 import "../styles/loginregistro.css";
 
 interface LoginRegistroProps {
   onLogin: (usuario: any) => void;
+  modoInicial?: "login" | "registro";
 }
 
-const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
-  const [esRegistro, setEsRegistro] = useState(false);
+const LoginRegistro: React.FC<LoginRegistroProps> = ({
+  onLogin,
+  modoInicial = "login",
+}) => {
+  const router = useRouter(); // ✅ hook para redirección
+  const [esRegistro, setEsRegistro] = useState(modoInicial === "registro");
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
   const [contraseña, setContraseña] = useState("");
@@ -49,6 +55,12 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
       guardarSesionEnLocalStorage(resultado.token, resultado.usuario);
       alert(resultado.mensaje || "Sesión iniciada correctamente.");
       onLogin(resultado.usuario);
+
+      // ✅ Si es registro, redirigir al login
+      if (esRegistro) {
+        router.push("/login"); // Asegúrate de tener esta ruta creada
+      }
+
     } catch (error) {
       alert("No se pudo conectar con el servidor.");
     } finally {
@@ -104,7 +116,9 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               {mostrar ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-          <small className="login-disney-case">(distingue mayúsculas y minúsculas)</small>
+          <small className="login-disney-case">
+            (distingue mayúsculas y minúsculas)
+          </small>
           <button type="submit" className="login-disney-btn" disabled={cargando}>
             {cargando
               ? esRegistro
