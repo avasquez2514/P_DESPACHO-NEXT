@@ -4,7 +4,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import "../styles/plantillasAdicionales.css";
 import Modal from "./Modal";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"; // NUEVO
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 interface Plantilla {
   id: string;
@@ -16,8 +16,11 @@ interface PlantillasAdicionalesProps {
   torre: string;
 }
 
+const STORAGE_KEY = "plantillasAdicionalesOrden";
+
 const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) => {
   const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
+  const [ordenPlantillas, setOrdenPlantillas] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modo, setModo] = useState<"agregar" | "editar">("agregar");
 
@@ -29,6 +32,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
 
   const API = `${process.env.NEXT_PUBLIC_API_URL}/api/notas`;
 
+  // Cargar plantillas y orden desde la API y localStorage
   const cargarPlantillas = async () => {
     const token = localStorage.getItem("token");
     const usuarioRaw = localStorage.getItem("usuario");
@@ -42,7 +46,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
 
       const data = await res.json();
 
-      const filtradas = data
+      const filtradas: Plantilla[] = data
         .filter(
           (nota: any) =>
             nota.plantilla?.trim() &&
@@ -57,6 +61,16 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
         }));
 
       setPlantillas(filtradas);
+
+      // Cargar el orden guardado si existe
+      const guardado = localStorage.getItem(STORAGE_KEY);
+      if (guardado) {
+        const ordenGuardada = JSON.parse(guardado) as string[];
+        // Filtrar por las que existen actualmente
+        setOrdenPlantillas(ordenGuardada.filter((id) => filtradas.some(p => p.id === id)));
+      } else {
+        setOrdenPlantillas(filtradas.map(p => p.id));
+      }
     } catch (error) {
       console.error("Error al cargar plantillas:", error);
     }
@@ -65,6 +79,13 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
   useEffect(() => {
     cargarPlantillas();
   }, []);
+
+  // Guardar el orden en localStorage cada vez que cambie
+  useEffect(() => {
+    if (ordenPlantillas.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ordenPlantillas));
+    }
+  }, [ordenPlantillas]);
 
   const copiarPlantilla = (texto: string) => {
     navigator.clipboard.writeText(texto).catch((err) =>
@@ -155,14 +176,19 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     }
   };
 
-  // NUEVO: función para drag & drop
+  // Drag & drop: actualiza el orden y lo guarda
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    const items = Array.from(plantillas);
+    const items = Array.from(ordenPlantillas);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    setPlantillas(items);
+    setOrdenPlantillas(items);
   };
+
+  // Obtener las plantillas en el orden actual
+  const plantillasOrdenadas = ordenPlantillas
+    .map(id => plantillas.find(p => p.id === id))
+    .filter(Boolean) as Plantilla[];
 
   return (
     <div className="plantilla-container">
@@ -173,7 +199,6 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
           ➕ Agregar Plantilla
         </button>
 
-        {/* NUEVO: DragDropContext y Droppable */}
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="plantillas-list">
             {(provided) => (
@@ -182,7 +207,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
                 {...provided.droppableProps}
                 ref={provided.innerRef}
               >
-                {plantillas.map((plantilla, index) => (
+                {plantillasOrdenadas.map((plantilla, index) => (
                   <Draggable key={plantilla.id} draggableId={plantilla.id} index={index}>
                     {(provided) => (
                       <div

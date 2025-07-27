@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaTrash } from "react-icons/fa";
 import "../styles/notasConciliacion.css";
 import Modal from "./Modal";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"; // NUEVO
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 interface NotasConciliacionProps {
   torre: string;
 }
 
 type Modo = "agregar" | "modificar" | "";
+
+const STORAGE_KEY = "categoriasConciliacionOrden";
 
 const categoriasIniciales = [
   "CONCILIACION EQUIPOS",
@@ -31,7 +33,20 @@ const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
   const [modo, setModo] = useState<Modo>("");
   const [textoTemporal, setTextoTemporal] = useState("");
   const [indexEditar, setIndexEditar] = useState<number | null>(null);
-  const [categorias, setCategorias] = useState<string[]>(categoriasIniciales);
+
+  // Cargar el orden desde localStorage al iniciar
+  const [categorias, setCategorias] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const guardadas = localStorage.getItem(STORAGE_KEY);
+      return guardadas ? JSON.parse(guardadas) : categoriasIniciales;
+    }
+    return categoriasIniciales;
+  });
+
+  // Guardar el orden en localStorage cada vez que cambie
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(categorias));
+  }, [categorias]);
 
   const abrirModalAgregar = () => {
     setModo("agregar");
@@ -76,7 +91,7 @@ const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
     setCategorias(nuevas);
   };
 
-  // NUEVO: función para drag & drop
+  // Drag & drop: actualiza el orden y lo guarda
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const items = Array.from(categorias);
@@ -92,7 +107,6 @@ const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
         <button className="agregar-button" onClick={abrirModalAgregar}>
           ➕ Agregar Categoría
         </button>
-        {/* NUEVO: DragDropContext y Droppable */}
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="categorias-list">
             {(provided) => (
@@ -144,7 +158,6 @@ const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
           </Droppable>
         </DragDropContext>
       </div>
-      {/* Modal para agregar/modificar categoría */}
       <Modal isOpen={modalOpen} onClose={cerrarModal}>
         <h2>{modo === "agregar" ? "Agregar Categoría" : "Modificar Categoría"}</h2>
         <input

@@ -32,7 +32,7 @@
 /* =============================== */
 .notas-conciliacion-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* ← Fuerza 2 columnas */
+  grid-template-columns: repeat(3, 1fr); /* ← Fuerza 2 columnas */
   gap: 1rem;
 }
 

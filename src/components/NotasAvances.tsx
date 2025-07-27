@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import "../styles/notasAvances.css";
 import Modal from "./Modal";
-import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"; // Nuevo import
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 interface Nota {
   id: string;
@@ -15,9 +15,11 @@ interface NotasAvancesProps {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+const STORAGE_KEY = "notasAvancesOrden";
 
 const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
   const [notasAvance, setNotasAvance] = useState<Nota[]>([]);
+  const [ordenNotas, setOrdenNotas] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [textoNota, setTextoNota] = useState("");
   const [modo, setModo] = useState<"agregar" | "modificar">("agregar");
@@ -29,6 +31,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const usuario_id = usuario?.id;
 
+  // Cargar notas y orden desde la API y localStorage
   const cargarNotas = useCallback(async () => {
     if (!usuario_id || !token) return;
 
@@ -44,6 +47,15 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
         .map((n: any) => ({ id: n.id, texto: n.nota_avances }));
 
       setNotasAvance(filtradas);
+
+      // Cargar el orden guardado si existe
+      const guardado = localStorage.getItem(STORAGE_KEY);
+      if (guardado) {
+        const ordenGuardada = JSON.parse(guardado) as string[];
+        setOrdenNotas(ordenGuardada.filter((id) => filtradas.some(n => n.id === id)));
+      } else {
+        setOrdenNotas(filtradas.map(n => n.id));
+      }
     } catch (error) {
       console.error("Error al cargar notas:", error);
     }
@@ -52,6 +64,13 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
   useEffect(() => {
     cargarNotas();
   }, [cargarNotas]);
+
+  // Guardar el orden en localStorage cada vez que cambie
+  useEffect(() => {
+    if (ordenNotas.length) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ordenNotas));
+    }
+  }, [ordenNotas]);
 
   const copiarNota = (texto: string) => {
     navigator.clipboard.writeText(prefijo + texto).catch((err) => console.error("Error al copiar: ", err));
@@ -120,14 +139,19 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     }
   };
 
-  // NUEVO: función para drag & drop
+  // Drag & drop: actualiza el orden y lo guarda
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    const items = Array.from(notasAvance);
+    const items = Array.from(ordenNotas);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-    setNotasAvance(items);
+    setOrdenNotas(items);
   };
+
+  // Obtener las notas en el orden actual
+  const notasOrdenadas = ordenNotas
+    .map(id => notasAvance.find(n => n.id === id))
+    .filter(Boolean) as Nota[];
 
   return (
     <div className="notas-avances-container">
@@ -137,7 +161,6 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
         ➕ Agregar Nota
       </button>
 
-      {/* NUEVO: DragDropContext y Droppable */}
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="notas-list">
           {(provided) => (
@@ -146,7 +169,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
               {...provided.droppableProps}
               ref={provided.innerRef}
             >
-              {notasAvance.map((nota, index) => (
+              {notasOrdenadas.map((nota, index) => (
                 <Draggable key={nota.id} draggableId={nota.id} index={index}>
                   {(provided) => (
                     <div
