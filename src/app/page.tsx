@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Alarma from "../components/Alarma";
 import Aplicativos from "../components/Aplicativos";
 import EnvioCorreos from "../components/EnvioCorreos";
+import LoginRegistro from "../components/LoginRegistro";
 import NotasAvances from "../components/NotasAvances";
 import NotasConciliacion from "../components/NotasConciliacion";
 import NovedadesAsesor from "../components/NovedadesAsesor";
@@ -12,7 +13,7 @@ import PlantillaSelector from "../components/PlantillaSelector";
 import Sidebar from "../components/Sidebar";
 import TorreSelector from "../components/TorreSelector";
 import Tema from "../components/Tema";
-import PantallaInicio from "../components/PantallaInicio"; // ✅
+import PantallaInicio from "../components/PantallaInicio"; // ✅ 1. Importado
 
 import { useNavegacion } from "../hooks/useNavegacion";
 
@@ -24,12 +25,14 @@ interface Usuario {
 
 export default function Page() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [mostrarPantallaInicio, setMostrarPantallaInicio] = useState(true); // ✅ 2. Nuevo estado
 
   useEffect(() => {
     try {
       const guardado = localStorage.getItem("usuario");
       if (guardado && guardado !== "undefined") {
         setUsuario(JSON.parse(guardado));
+        setMostrarPantallaInicio(false); // ✅ Oculta bienvenida si ya hay sesión
       }
     } catch (error) {
       console.error("❌ Error al leer usuario desde localStorage:", error);
@@ -55,16 +58,26 @@ export default function Page() {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
     setUsuario(null);
+    setMostrarPantallaInicio(true); // ✅ Regresar a bienvenida tras cerrar sesión
   };
 
   const handleMenuOpen = () => setMenuOpen(!menuOpen);
+
+  // ✅ Mostrar PantallaInicio si no hay usuario
+  if (!usuario && mostrarPantallaInicio) {
+    return (
+      <PantallaInicio
+        onIniciarSesion={() => setMostrarPantallaInicio(false)} // botón "Iniciar sesión"
+      />
+    );
+  }
 
   return (
     <div className="app-container">
       <div className="marca-de-agua"></div>
 
       {!usuario ? (
-        <PantallaInicio /> // ✅ Muestra bienvenida y opción de registro
+        <LoginRegistro onLogin={(u) => { setUsuario(u); }} />
       ) : (
         <>
           <Tema />
@@ -101,7 +114,9 @@ export default function Page() {
               <PlantillaSelector torre={torre} onSelect={() => {}} />
             ) : vistaEspecial === "plantillasAdicionales" ? (
               <PlantillasAdicionales torre={torre} />
-            ) : ["envioInicio", "envioCierre", "envioApertura"].includes(vistaEspecial) ? (
+            ) : vistaEspecial === "envioInicio" ||
+              vistaEspecial === "envioCierre" ||
+              vistaEspecial === "envioApertura" ? (
               <EnvioCorreos tipo={vistaEspecial} />
             ) : vistaEspecial === "alarma" ? (
               <Alarma />
@@ -120,3 +135,4 @@ export default function Page() {
     </div>
   );
 }
+
