@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import "../styles/notasAvances.css";
 import Modal from "./Modal";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"; // Nuevo import
 
 interface Nota {
   id: string;
@@ -119,6 +120,15 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     }
   };
 
+  // NUEVO: función para drag & drop
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const items = Array.from(notasAvance);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setNotasAvance(items);
+  };
+
   return (
     <div className="notas-avances-container">
       <h1 className="notas-avances-title">📌 Notas de Avances</h1>
@@ -127,24 +137,45 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
         ➕ Agregar Nota
       </button>
 
-      <div className="notas-list">
-        {notasAvance.map((nota) => (
-          <div key={nota.id} className="nota-item">
-            <p className="nota-texto">{nota.texto}</p>
-            <div className="nota-botones">
-              <button onClick={() => copiarNota(nota.texto)} className="copy" title="Copiar">
-                📋
-              </button>
-              <button onClick={() => abrirModalModificar(nota)} className="edit" title="Modificar">
-                ✏️
-              </button>
-              <button onClick={() => eliminarNota(nota.id)} className="delete" title="Eliminar">
-                🗑️
-              </button>
+      {/* NUEVO: DragDropContext y Droppable */}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="notas-list">
+          {(provided) => (
+            <div
+              className="notas-list"
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {notasAvance.map((nota, index) => (
+                <Draggable key={nota.id} draggableId={nota.id} index={index}>
+                  {(provided) => (
+                    <div
+                      className="nota-item"
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                    >
+                      <p className="nota-texto">{nota.texto}</p>
+                      <div className="nota-botones">
+                        <button onClick={() => copiarNota(nota.texto)} className="copy" title="Copiar">
+                          📋
+                        </button>
+                        <button onClick={() => abrirModalModificar(nota)} className="edit" title="Modificar">
+                          ✏️
+                        </button>
+                        <button onClick={() => eliminarNota(nota.id)} className="delete" title="Eliminar">
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
-          </div>
-        ))}
-      </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
         <h2>{modo === "agregar" ? "Agregar Nota" : "Modificar Nota"}</h2>

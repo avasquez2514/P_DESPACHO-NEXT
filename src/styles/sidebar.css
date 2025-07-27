@@ -56,7 +56,7 @@
 
 /* Posicionamiento dinámico cuando sidebar está abierto */
 .container.sidebar-open .menu-button {
-  left: 267px;
+  left: 265px;
   transform: translateY(-50%) rotate(0deg);
   
 }

@@ -32,7 +32,6 @@
   margin-bottom: 0.3rem;
   font-family: monospace; /* Para formato tipo código o estructura tabular */
   background-color: #ffffff;
-  box-shadow: inset 2px 2px 6px #a1a1a1, inset -2px -2px 6px #ffffff; /* Sombra interna sutil */
 }
 
 /* CONTENEDOR DE BOTONES */
