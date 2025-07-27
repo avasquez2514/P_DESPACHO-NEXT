@@ -1,0 +1,16 @@
+{
+  "name": "Despacho Next",
+  "short_name": "Despacho",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f2937",
+  "description": "Tu aplicación de despacho",
+  "icons": [
+    {
+      "src": "/icono01.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
