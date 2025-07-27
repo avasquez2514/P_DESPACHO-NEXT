@@ -2,17 +2,14 @@
 
 import React, { useState, FormEvent } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useRouter } from "next/navigation";
 import "../styles/loginregistro.css";
 
 interface LoginRegistroProps {
   onLogin: (usuario: any) => void;
-  modoInicial?: "login" | "registro";
 }
 
-function LoginRegistro({ onLogin, modoInicial = "login" }: LoginRegistroProps) {
-  const router = useRouter();
-  const [esRegistro, setEsRegistro] = useState(modoInicial === "registro");
+const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
+  const [esRegistro, setEsRegistro] = useState(false);
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
   const [contraseña, setContraseña] = useState("");
@@ -52,11 +49,6 @@ function LoginRegistro({ onLogin, modoInicial = "login" }: LoginRegistroProps) {
       guardarSesionEnLocalStorage(resultado.token, resultado.usuario);
       alert(resultado.mensaje || "Sesión iniciada correctamente.");
       onLogin(resultado.usuario);
-
-      if (esRegistro) {
-        router.push("/login");
-      }
-
     } catch (error) {
       alert("No se pudo conectar con el servidor.");
     } finally {
@@ -112,9 +104,7 @@ function LoginRegistro({ onLogin, modoInicial = "login" }: LoginRegistroProps) {
               {mostrar ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-          <small className="login-disney-case">
-            (distingue mayúsculas y minúsculas)
-          </small>
+          <small className="login-disney-case">(distingue mayúsculas y minúsculas)</small>
           <button type="submit" className="login-disney-btn" disabled={cargando}>
             {cargando
               ? esRegistro
@@ -141,6 +131,6 @@ function LoginRegistro({ onLogin, modoInicial = "login" }: LoginRegistroProps) {
       </div>
     </div>
   );
-}
+};
 
 export default LoginRegistro;
