@@ -42,7 +42,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
 
       const data = await res.json();
 
-      const filtradas = data
+      const filtradas: Nota[] = data
         .filter((n: any) => n.nota_avances?.trim())
         .map((n: any) => ({ id: n.id, texto: n.nota_avances }));
 
@@ -54,7 +54,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
         const ordenGuardada = JSON.parse(guardado) as string[];
         setOrdenNotas(ordenGuardada.filter((id) => filtradas.some((n: Nota) => n.id === id)));
       } else {
-        setOrdenNotas(filtradas.map(n => n.id));
+        setOrdenNotas(filtradas.map((n: Nota) => n.id));
       }
     } catch (error) {
       console.error("Error al cargar notas:", error);
@@ -150,7 +150,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
 
   // Obtener las notas en el orden actual
   const notasOrdenadas = ordenNotas
-    .map(id => notasAvance.find(n => n.id === id))
+    .map(id => notasAvance.find((n: Nota) => n.id === id))
     .filter(Boolean) as Nota[];
 
   return (

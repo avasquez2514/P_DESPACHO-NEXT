@@ -66,10 +66,9 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       const guardado = localStorage.getItem(STORAGE_KEY);
       if (guardado) {
         const ordenGuardada = JSON.parse(guardado) as string[];
-        // Filtrar por las que existen actualmente
         setOrdenPlantillas(ordenGuardada.filter((id) => filtradas.some((p: Plantilla) => p.id === id)));
       } else {
-        setOrdenPlantillas(filtradas.map(p => p.id));
+        setOrdenPlantillas(filtradas.map((p: Plantilla) => p.id));
       }
     } catch (error) {
       console.error("Error al cargar plantillas:", error);
@@ -187,7 +186,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
 
   // Obtener las plantillas en el orden actual
   const plantillasOrdenadas = ordenPlantillas
-    .map(id => plantillas.find(p => p.id === id))
+    .map(id => plantillas.find((p: Plantilla) => p.id === id))
     .filter(Boolean) as Plantilla[];
 
   return (
