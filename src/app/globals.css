@@ -222,7 +222,6 @@ button {
 /* 🌙 MODO OSCURO: Solo se aplica si body tiene la clase .dark-theme */
 body.dark-theme, html.dark-theme {
   color: #e5e5e5;
-  background-image: none;
   background-color: #1a1a1a;
 }
 
