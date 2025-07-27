@@ -1,21 +1,19 @@
 /* 📦 CONTENEDOR GENERAL DE LA VISTA */
 .aplicativos-container {
-  display: flex;
-  gap: 2rem;
-  padding: 2rem;
-  font-family: 'Segoe UI', sans-serif;
+  display: flex;                     /* Contenedor en modo fila */
+  gap: 2rem;                         /* Espacio entre panel y zona de contenido */
+  padding: 2rem;                    /* Espaciado interno general */
+  font-family: 'Segoe UI', sans-serif;  /* Fuente predeterminada */
 }
 
 /* 📂 PANEL LATERAL DE CATEGORÍAS */
 .panel-categorias {
-  width: 251px;
-  background-color: #163245;
-  border-radius: 12px;
-  padding: 4rem;
-  box-shadow: 0 11px 43px rgba(0, 0, 0, 0.05);
+  width: 251px;                         /* Ancho fijo del panel */
+  background-color: #163245;           /* Color de fondo base */
+  border-radius: 12px;                 /* Bordes redondeados */
+  padding: 4rem;                       /* Espaciado interno */
+  box-shadow: 0 11px 43px rgba(0, 0, 0, 0.05); /* Sombra suave */
   background: linear-gradient(90deg, #000000, rgb(0 0 0 / 58%));
-  font-size: 14px;
-  color: #ffffff;
 }
 
 .panel-categorias h3 {
@@ -24,6 +22,7 @@
   margin-bottom: 1rem;
 }
 
+/* 🎯 Cada opción de categoría */
 .categoria-opcion {
   display: flex;
   align-items: center;
@@ -31,8 +30,9 @@
   margin-bottom: 10px;
 }
 
+/* 🔘 Botón para seleccionar una categoría */
 .categoria-btn {
-  all: unset;
+  all: unset;                         /* Elimina todos los estilos por defecto */
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -44,15 +44,17 @@
 }
 
 .categoria-btn:hover {
-  background-color: #e5e7eb;
+  background-color: #e5e7eb;         /* Fondo gris claro al pasar el mouse */
 }
 
+/* ✅ Estilo para categoría seleccionada */
 .categoria-btn.activa {
-  color: #2563eb;
+  color: #2563eb;                     /* Azul intenso */
   font-weight: 700;
   background-color: #ffffff;
 }
 
+/* 🔢 Contador de aplicativos por categoría */
 .contador {
   background-color: #e0e7ff;
   color: #1e3a8a;
@@ -62,6 +64,7 @@
   margin-left: 6px;
 }
 
+/* 🗑️ Botón para eliminar categoría */
 .btn-eliminar-categoria {
   background: linear-gradient(to right, #1d2636, #1a1a1a);
   border: none;
@@ -72,10 +75,11 @@
 }
 
 .btn-eliminar-categoria:hover {
-  transform: scale(1.2);
+  transform: scale(1.2);             /* Efecto de ampliación al pasar el mouse */
 }
 
-.plantilla-button.copy {
+/* ➕ Botón para agregar categoría */
+.btn-agregar-categoria {
   margin-top: 1rem;
   background-color: #3b82f6;
   color: white;
@@ -89,90 +93,90 @@
   transition: background 0.3s;
 }
 
-.plantilla-button.copy:hover {
-  background-color: #1d4ed8;
+.btn-agregar-categoria:hover {
+  background-color: #1d4ed8;         /* Azul más oscuro al hacer hover */
 }
 
 /* 🧱 ZONA PRINCIPAL DE LOS APLICATIVOS */
-.contenido-aplicativos {
+.zona-aplicativos {
   flex: 1;
-  text-align: center;
-  background: linear-gradient(90deg, #00000000, #0000008a);
-}
-
-.titulo {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 2rem;
-}
-
-/* 🧩 GRID DE APLICATIVOS */
-.lista-aplicativos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-/* 🪪 BOTÓN GRANDE DE APLICATIVO */
-.item-aplicativo-boton {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  margin: 12px;
-  padding: 12px;
-  background: #f3f4f6;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px #0001;
 }
 
-.aplicativo-boton {
-  font-size: 1.2rem;
-  font-weight: bold;
-  background: #2563eb;
-  color: #fff;
+.zona-aplicativos h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+/* 🧩 GRID DE APLICATIVOS - tres columnas */
+.lista-aplicativos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* ← exactamente 3 columnas */
+  gap: 1.5rem;
+}
+
+/* 🪪 TARJETA DE APLICATIVO */
+.item-aplicativo {
+  border-radius: 1rem;
+  padding: 1.2rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.item-aplicativo:hover {
+  transform: translateY(-4px);       /* Levanta la tarjeta al hacer hover */
+  background-color: #ffffff;
+}
+
+.item-aplicativo a {
+  color: #111827;
+  text-decoration: none;
+}
+
+/* 📛 Nombre debajo del ícono del aplicativo */
+.nombre-app {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ⚙️ Botones de editar y eliminar */
+.acciones {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.btn-editar,
+.btn-eliminar {
+  background: none;
   border: none;
-  border-radius: 8px;
-  padding: 18px 32px;
-  margin-bottom: 8px;
+  font-size: 1.1rem;
   cursor: pointer;
-  width: 180px;
-  transition: background 0.2s;
+  transition: transform 0.2s ease;
 }
 
-.aplicativo-boton:hover {
-  background: #1e40af;
+.btn-editar {
+  color: #2563eb;
 }
 
-.acciones-botones {
-  display: flex;
-  gap: 10px;
+.btn-eliminar {
+  color: #dc2626;
 }
 
-.btn-editar, .btn-eliminar {
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 6px 14px;
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.btn-editar:hover {
-  background: #e0e7ff;
-  border-color: #2563eb;
-}
-
+.btn-editar:hover,
 .btn-eliminar:hover {
-  background: #fee2e2;
-  border-color: #dc2626;
+  transform: scale(1.2);             /* Efecto de zoom al pasar el mouse */
 }
 
 /* ➕ BOTÓN AGREGAR NUEVO APLICATIVO */
-.plantilla-button.copy:last-child {
+.btn-agregar {
   margin-top: 2rem;
   align-self: flex-start;
   background-color: #10b981;
@@ -189,6 +193,18 @@
   transition: background-color 0.3s ease;
 }
 
-.plantilla-button.copy:last-child:hover {
-  background-color: #059669;
+.btn-agregar:hover {
+  background-color: #059669;         /* Verde más oscuro al hacer hover */
+}
+
+/* 🎨 Fondo de la zona principal */
+.contenido-aplicativos {
+  text-align: center;
+  background: linear-gradient(90deg, #00000000, #0000008a);
+}
+
+/* 🖋️ Ajustes extra de fuente del panel lateral */
+.panel-categorias {
+  font-size: 14px;
+  color: #ffffff;
 }
