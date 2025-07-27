@@ -1,19 +1,21 @@
 /* loginregistro.css */
 .login-disney-wrapper {
   min-height: 100vh;
+  min-width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(120deg, #23272f 60%, #e5e7eb 100%);
+  background: linear-gradient(120deg, #23272f73 60%, #e5e7eb);
 }
 
 .login-disney-card {
-  background: #181a20;
+  background: #15171d;
   border-radius: 18px;
-  box-shadow: 0 8px 32px #0006;
-  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  box-shadow: 0 8px 32px #000000;
+  padding: 2.5rem 2.5rem 2rem;
   width: 350px;
-  display: flex;
+  display: flex
+;
   flex-direction: column;
   align-items: center;
 }
@@ -84,7 +86,7 @@
 
 .login-disney-btn {
   width: 100%;
-  background: #0072d2;
+  background: linear-gradient(135deg, #050709, #196aecab);
   color: #fff;
   font-weight: 700;
   font-size: 1.1rem;
@@ -234,3 +236,4 @@
   margin: 0 0.5rem;
   font-size: 1.2rem;
 }
+

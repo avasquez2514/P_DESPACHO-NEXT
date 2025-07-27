@@ -119,7 +119,7 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
           type="button"
           className="login-disney-btn login-disney-btn-register"
           onClick={() => setEsRegistro((v) => !v)}
-          style={{ marginTop: "0.7rem", background: "#10b981" }}
+          style={{ marginTop: "0.7rem", background: "linear-gradient(135deg, #050709, #88d700ab)" }}
         >
           {esRegistro ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
         </button>
