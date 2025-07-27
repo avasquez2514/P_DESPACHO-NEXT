@@ -29,7 +29,7 @@ export default function RootLayout({
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icon-192x192.png" />
-        <meta name="theme-color" content="#1e88e5" />
+        <meta name="theme-color" content="#0d131aff" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body
