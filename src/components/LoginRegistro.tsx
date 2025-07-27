@@ -2,7 +2,7 @@
 
 import React, { useState, FormEvent } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useRouter } from "next/navigation"; // ✅ para redireccionar
+import { useRouter } from "next/navigation";
 import "../styles/loginregistro.css";
 
 interface LoginRegistroProps {
@@ -10,11 +10,8 @@ interface LoginRegistroProps {
   modoInicial?: "login" | "registro";
 }
 
-const LoginRegistro: React.FC<LoginRegistroProps> = ({
-  onLogin,
-  modoInicial = "login",
-}) => {
-  const router = useRouter(); // ✅ hook para redirección
+function LoginRegistro({ onLogin, modoInicial = "login" }: LoginRegistroProps) {
+  const router = useRouter();
   const [esRegistro, setEsRegistro] = useState(modoInicial === "registro");
   const [email, setEmail] = useState("");
   const [nombre, setNombre] = useState("");
@@ -56,9 +53,8 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({
       alert(resultado.mensaje || "Sesión iniciada correctamente.");
       onLogin(resultado.usuario);
 
-      // ✅ Si es registro, redirigir al login
       if (esRegistro) {
-        router.push("/login"); // Asegúrate de tener esta ruta creada
+        router.push("/login");
       }
 
     } catch (error) {
@@ -145,6 +141,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({
       </div>
     </div>
   );
-};
+}
 
 export default LoginRegistro;

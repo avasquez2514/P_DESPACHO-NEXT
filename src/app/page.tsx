@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Alarma from "../components/Alarma";
 import Aplicativos from "../components/Aplicativos";
 import EnvioCorreos from "../components/EnvioCorreos";
-import LoginRegistro from "../components/LoginRegistro";
 import NotasAvances from "../components/NotasAvances";
 import NotasConciliacion from "../components/NotasConciliacion";
 import NovedadesAsesor from "../components/NovedadesAsesor";
@@ -12,7 +11,8 @@ import PlantillasAdicionales from "../components/PlantillasAdicionales";
 import PlantillaSelector from "../components/PlantillaSelector";
 import Sidebar from "../components/Sidebar";
 import TorreSelector from "../components/TorreSelector";
-import Tema from "../components/Tema"; // ✅ Aquí se importa
+import Tema from "../components/Tema";
+import PantallaInicio from "../components/PantallaInicio"; // ✅
 
 import { useNavegacion } from "../hooks/useNavegacion";
 
@@ -64,10 +64,10 @@ export default function Page() {
       <div className="marca-de-agua"></div>
 
       {!usuario ? (
-        <LoginRegistro onLogin={setUsuario} />
+        <PantallaInicio /> // ✅ Muestra bienvenida y opción de registro
       ) : (
         <>
-          <Tema /> {/* ✅ Se renderiza solo si hay usuario */}
+          <Tema />
 
           {torre && (
             <div className="torre-fija">
@@ -94,16 +94,14 @@ export default function Page() {
             ) : modoB2B && !torre ? (
               <TorreSelector onSelect={handleTorreSeleccionada} />
             ) : vistaEspecial === "notasAvances" ? (
-              <NotasAvances torre={torre}/>
+              <NotasAvances torre={torre} />
             ) : vistaEspecial === "notasConciliacion" ? (
               <NotasConciliacion torre={torre} />
             ) : vistaEspecial === "notasSeguimiento" ? (
               <PlantillaSelector torre={torre} onSelect={() => {}} />
             ) : vistaEspecial === "plantillasAdicionales" ? (
               <PlantillasAdicionales torre={torre} />
-            ) : vistaEspecial === "envioInicio" ||
-              vistaEspecial === "envioCierre" ||
-              vistaEspecial === "envioApertura" ? (
+            ) : ["envioInicio", "envioCierre", "envioApertura"].includes(vistaEspecial) ? (
               <EnvioCorreos tipo={vistaEspecial} />
             ) : vistaEspecial === "alarma" ? (
               <Alarma />

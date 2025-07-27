@@ -1,35 +1,31 @@
-import React, { useState } from "react";
-import LoginRegistro from "./LoginRegistro";
-import { FaInstagram, FaLinkedin, FaFacebook } from "react-icons/fa";
-import "../styles/loginregistro.css";
+'use client';
+
+import React from "react";
+import { useRouter } from "next/navigation";
+import LoginRegistro from "@/components/LoginRegistro";
 
 const PantallaInicio: React.FC = () => {
-  const [mostrarLogin, setMostrarLogin] = useState(false);
-
-  if (mostrarLogin) {
-    return <LoginRegistro modoInicial="login" onLogin={(user) => console.log("Logeado:", user)} />;
-  }
+  const router = useRouter();
 
   return (
     <div className="pantalla-inicio">
-      <div className="columna izquierda">
-        <h1>Bienvenido a <span className="marca">DaniCodex</span></h1>
+      <div className="columna-izquierda">
+        <h2>Bienvenido a <span style={{ color: "#fff" }}>DaniCodex</span></h2>
         <p>Si ya tienes una cuenta por favor inicia sesión aquí</p>
-        <button onClick={() => setMostrarLogin(true)} className="btn-iniciar">
+        <button className="btn-iniciar" onClick={() => router.push("/login")}>
           Iniciar Sesión
         </button>
       </div>
-      <div className="columna derecha">
-        <div className="registro-box">
-          <h2>Crear una cuenta</h2>
-          <div className="iconos-sociales">
-            <FaInstagram />
-            <FaLinkedin />
-            <FaFacebook />
-          </div>
-          <p className="registro-subtexto">Crear una cuenta gratis</p>
-          <LoginRegistro modoInicial="registro" onLogin={(user) => console.log("Registrado:", user)} />
+
+      <div className="columna-derecha">
+        <h2>Crear una cuenta</h2>
+        <div className="redes-sociales">
+          <button>📷</button>
+          <button>💼</button>
+          <button>📘</button>
         </div>
+        <p>Crear una cuenta gratis</p>
+        <LoginRegistro modoInicial="registro" onLogin={() => {}} />
       </div>
     </div>
   );
