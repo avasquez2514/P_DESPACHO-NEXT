@@ -1,18 +1,19 @@
 'use client';
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import LoginRegistro from "@/components/LoginRegistro";
 
-const PantallaInicio: React.FC = () => {
-  const router = useRouter();
+interface PantallaInicioProps {
+  onIniciarSesion: () => void;
+}
 
+const PantallaInicio: React.FC<PantallaInicioProps> = ({ onIniciarSesion }) => {
   return (
     <div className="pantalla-inicio">
       <div className="columna-izquierda">
         <h2>Bienvenido a <span style={{ color: "#fff" }}>DaniCodex</span></h2>
         <p>Si ya tienes una cuenta por favor inicia sesión aquí</p>
-        <button className="btn-iniciar" onClick={() => router.push("/login")}>
+        <button className="btn-iniciar" onClick={onIniciarSesion}>
           Iniciar Sesión
         </button>
       </div>

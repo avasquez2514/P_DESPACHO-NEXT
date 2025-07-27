@@ -13,7 +13,7 @@ import PlantillaSelector from "../components/PlantillaSelector";
 import Sidebar from "../components/Sidebar";
 import TorreSelector from "../components/TorreSelector";
 import Tema from "../components/Tema";
-import PantallaInicio from "../components/PantallaInicio"; // ✅ 1. Importado
+import PantallaInicio from "../components/PantallaInicio"; // ✅ Agregado
 
 import { useNavegacion } from "../hooks/useNavegacion";
 
@@ -25,14 +25,14 @@ interface Usuario {
 
 export default function Page() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [mostrarPantallaInicio, setMostrarPantallaInicio] = useState(true); // ✅ 2. Nuevo estado
+  const [mostrarPantallaInicio, setMostrarPantallaInicio] = useState(true); // ✅ Estado para pantalla inicial
 
   useEffect(() => {
     try {
       const guardado = localStorage.getItem("usuario");
       if (guardado && guardado !== "undefined") {
         setUsuario(JSON.parse(guardado));
-        setMostrarPantallaInicio(false); // ✅ Oculta bienvenida si ya hay sesión
+        setMostrarPantallaInicio(false); // Oculta pantalla de bienvenida si ya hay sesión
       }
     } catch (error) {
       console.error("❌ Error al leer usuario desde localStorage:", error);
@@ -58,16 +58,16 @@ export default function Page() {
     localStorage.removeItem("token");
     localStorage.removeItem("usuario");
     setUsuario(null);
-    setMostrarPantallaInicio(true); // ✅ Regresar a bienvenida tras cerrar sesión
+    setMostrarPantallaInicio(true); // ✅ Vuelve a bienvenida al cerrar sesión
   };
 
   const handleMenuOpen = () => setMenuOpen(!menuOpen);
 
-  // ✅ Mostrar PantallaInicio si no hay usuario
+  // ✅ Mostrar PantallaInicio si aún no ha iniciado sesión
   if (!usuario && mostrarPantallaInicio) {
     return (
       <PantallaInicio
-        onIniciarSesion={() => setMostrarPantallaInicio(false)} // botón "Iniciar sesión"
+        onIniciarSesion={() => setMostrarPantallaInicio(false)}
       />
     );
   }
@@ -77,7 +77,7 @@ export default function Page() {
       <div className="marca-de-agua"></div>
 
       {!usuario ? (
-        <LoginRegistro onLogin={(u) => { setUsuario(u); }} />
+        <LoginRegistro onLogin={(u) => setUsuario(u)} />
       ) : (
         <>
           <Tema />
@@ -135,4 +135,3 @@ export default function Page() {
     </div>
   );
 }
-
