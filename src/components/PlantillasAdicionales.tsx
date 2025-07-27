@@ -67,7 +67,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       if (guardado) {
         const ordenGuardada = JSON.parse(guardado) as string[];
         // Filtrar por las que existen actualmente
-        setOrdenPlantillas(ordenGuardada.filter((id) => filtradas.some(p => p.id === id)));
+        setOrdenPlantillas(ordenGuardada.filter((id) => filtradas.some((p: Plantilla) => p.id === id)));
       } else {
         setOrdenPlantillas(filtradas.map(p => p.id));
       }

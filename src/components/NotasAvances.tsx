@@ -52,7 +52,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
       const guardado = localStorage.getItem(STORAGE_KEY);
       if (guardado) {
         const ordenGuardada = JSON.parse(guardado) as string[];
-        setOrdenNotas(ordenGuardada.filter((id) => filtradas.some(n => n.id === id)));
+        setOrdenNotas(ordenGuardada.filter((id) => filtradas.some((n: Nota) => n.id === id)));
       } else {
         setOrdenNotas(filtradas.map(n => n.id));
       }
