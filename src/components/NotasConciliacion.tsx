@@ -1,18 +1,17 @@
-"use client"; // 🧠 Obligatorio en Next.js para componentes que usan interactividad del cliente
+"use client";
 
 import React, { useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import "../styles/notasConciliacion.css";
-import Modal from "./Modal"; // Componente Modal reutilizable
+import Modal from "./Modal";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"; // NUEVO
 
 interface NotasConciliacionProps {
   torre: string;
 }
 
-// 📘 Tipo para el estado del modo actual del modal
 type Modo = "agregar" | "modificar" | "";
 
-// 📘 Lista inicial de categorías predefinidas
 const categoriasIniciales = [
   "CONCILIACION EQUIPOS",
   "CONCILIACION MESA",
@@ -28,24 +27,18 @@ const categoriasIniciales = [
 ];
 
 const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
-
-  // 🔧 Estados del modal y edición
   const [modalOpen, setModalOpen] = useState(false);
   const [modo, setModo] = useState<Modo>("");
   const [textoTemporal, setTextoTemporal] = useState("");
   const [indexEditar, setIndexEditar] = useState<number | null>(null);
-
-  // 📂 Estado principal de las categorías
   const [categorias, setCategorias] = useState<string[]>(categoriasIniciales);
 
-  // ➕ Abrir modal para agregar
   const abrirModalAgregar = () => {
     setModo("agregar");
     setTextoTemporal("");
     setModalOpen(true);
   };
 
-  // ✏️ Abrir modal para modificar una categoría existente
   const abrirModalModificar = (index: number) => {
     setModo("modificar");
     setTextoTemporal(categorias[index]);
@@ -53,17 +46,14 @@ const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
     setModalOpen(true);
   };
 
-  // ❌ Cierra el modal y limpia estados temporales
   const cerrarModal = () => {
     setModalOpen(false);
     setTextoTemporal("");
     setIndexEditar(null);
   };
 
-  // 💾 Guarda una nueva categoría o modifica una existente
   const guardarModal = () => {
     if (!textoTemporal.trim()) return;
-
     if (modo === "agregar") {
       setCategorias([...categorias, textoTemporal.trim()]);
     } else if (modo === "modificar" && indexEditar !== null) {
@@ -71,66 +61,89 @@ const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
       nuevas[indexEditar] = textoTemporal.trim();
       setCategorias(nuevas);
     }
-
     cerrarModal();
   };
 
-  // 📋 Copia el texto de una categoría al portapapeles
   const copiarTexto = (texto: string) => {
     navigator.clipboard.writeText(texto)
       .catch((err) => console.error("Error al copiar el texto:", err));
   };
 
-  // 🗑️ Elimina una categoría de la lista
   const eliminarCategoria = (index: number) => {
     const confirmado = window.confirm("¿Estás seguro de eliminar esta categoría?");
     if (!confirmado) return;
-
     const nuevas = categorias.filter((_, i) => i !== index);
     setCategorias(nuevas);
+  };
+
+  // NUEVO: función para drag & drop
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const items = Array.from(categorias);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setCategorias(items);
   };
 
   return (
     <div className="notas-conciliacion-container">
       <div className="notas-conciliacion-card">
         <h2 className="notas-conciliacion-title">🧾 Notas de Conciliación</h2>
-
         <button className="agregar-button" onClick={abrirModalAgregar}>
           ➕ Agregar Categoría
         </button>
-
-        <div className="notas-conciliacion-list">
-          {categorias.map((categoria, index) => (
-            <div key={index} className="conciliacion-item">
-              <p className="conciliacion-texto">{categoria}</p>
-              <div className="conciliacion-buttons">
-                <button
-                  className="conciliacion-button"
-                  onClick={() => copiarTexto(categoria)}
-                  title="Copiar"
-                >
-                  📋
-                </button>
-                <button
-                  className="conciliacion-button eliminar"
-                  onClick={() => eliminarCategoria(index)}
-                  title="Eliminar"
-                >
-                  🗑️
-                </button>
-                <button
-                  className="conciliacion-button modificar"
-                  onClick={() => abrirModalModificar(index)}
-                  title="Modificar"
-                >
-                  ✏️
-                </button>
+        {/* NUEVO: DragDropContext y Droppable */}
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="categorias-list">
+            {(provided) => (
+              <div
+                className="notas-conciliacion-list"
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {categorias.map((categoria, index) => (
+                  <Draggable key={categoria} draggableId={categoria} index={index}>
+                    {(provided) => (
+                      <div
+                        className="conciliacion-item"
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <p className="conciliacion-texto">{categoria}</p>
+                        <div className="conciliacion-buttons">
+                          <button
+                            className="conciliacion-button"
+                            onClick={() => copiarTexto(categoria)}
+                            title="Copiar"
+                          >
+                            📋
+                          </button>
+                          <button
+                            className="conciliacion-button eliminar"
+                            onClick={() => eliminarCategoria(index)}
+                            title="Eliminar"
+                          >
+                            🗑️
+                          </button>
+                          <button
+                            className="conciliacion-button modificar"
+                            onClick={() => abrirModalModificar(index)}
+                            title="Modificar"
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
-
       {/* Modal para agregar/modificar categoría */}
       <Modal isOpen={modalOpen} onClose={cerrarModal}>
         <h2>{modo === "agregar" ? "Agregar Categoría" : "Modificar Categoría"}</h2>

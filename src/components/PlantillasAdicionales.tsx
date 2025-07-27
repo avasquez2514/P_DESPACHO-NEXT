@@ -1,236 +1,172 @@
-"use client"; // Indica que este componente se ejecuta en el cliente (Next.js)
+"use client";
 
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { FaTrash } from "react-icons/fa";
-import "../styles/plantillasAdicionales.css";
+import "../styles/notasConciliacion.css";
 import Modal from "./Modal";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"; // NUEVO
 
-// Interfaz que representa una plantilla adicional
-interface Plantilla {
-  id: string;
-  nombre: string;
-  texto: string;
-}
-
-// ✅ Interfaz para props
-interface PlantillasAdicionalesProps {
+interface NotasConciliacionProps {
   torre: string;
 }
 
-const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) => {
-  const [plantillas, setPlantillas] = useState<Plantilla[]>([]);
+type Modo = "agregar" | "modificar" | "";
+
+const categoriasIniciales = [
+  "CONCILIACION EQUIPOS",
+  "CONCILIACION MESA",
+  "CONCILIACION METRAJE",
+  "CONCILIACION HOTELES",
+  "CONCILIACION N2/N3",
+  "CONCILIACION INVENTARIO",
+  "CONCILIACION TIGO",
+  "CONCILIACION CLIENTE",
+  "CONCILIACION INFRAESTRUCTURA",
+  "CONCILIACION CENTROS COMERCIALES",
+  "CONCILIACION BMC",
+];
+
+const NotasConciliacion: React.FC<NotasConciliacionProps> = ({ torre }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const [modo, setModo] = useState<"agregar" | "editar">("agregar");
-
-  const [formData, setFormData] = useState<{
-    id: string | null;
-    nombre: string;
-    texto: string;
-  }>({ id: null, nombre: "", texto: "" });
-
-  const API = `${process.env.NEXT_PUBLIC_API_URL}/api/notas`;
-
-  const cargarPlantillas = async () => {
-    const token = localStorage.getItem("token");
-    const usuarioRaw = localStorage.getItem("usuario");
-    const usuario = usuarioRaw ? JSON.parse(usuarioRaw) : null;
-    if (!token || !usuario?.id) return;
-
-    try {
-      const res = await fetch(`${API}/${usuario.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await res.json();
-
-      const filtradas = data
-        .filter(
-          (nota: any) =>
-            nota.plantilla?.trim() &&
-            !nota.nota_publica?.trim() &&
-            !nota.nota_interna?.trim() &&
-            !nota.nota_avances?.trim()
-        )
-        .map((nota: any) => ({
-          id: nota.id,
-          nombre: nota.novedad || "Sin título",
-          texto: nota.plantilla,
-        }));
-
-      setPlantillas(filtradas);
-    } catch (error) {
-      console.error("Error al cargar plantillas:", error);
-    }
-  };
-
-  useEffect(() => {
-    cargarPlantillas();
-  }, []);
-
-  const copiarPlantilla = (texto: string) => {
-    navigator.clipboard.writeText(texto).catch((err) =>
-      console.error("Error al copiar: ", err)
-    );
-  };
-
-  const eliminarPlantilla = async (id: string | null) => {
-    if (!id) return;
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    if (!window.confirm("¿Estás seguro de eliminar esta plantilla?")) return;
-
-    try {
-      await fetch(`${API}/plantilla/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      cargarPlantillas();
-    } catch (error) {
-      console.error("Error al eliminar plantilla:", error);
-    }
-  };
+  const [modo, setModo] = useState<Modo>("");
+  const [textoTemporal, setTextoTemporal] = useState("");
+  const [indexEditar, setIndexEditar] = useState<number | null>(null);
+  const [categorias, setCategorias] = useState<string[]>(categoriasIniciales);
 
   const abrirModalAgregar = () => {
     setModo("agregar");
-    setFormData({ id: null, nombre: "", texto: "" });
+    setTextoTemporal("");
     setModalOpen(true);
   };
 
-  const abrirModalEditar = (plantilla: Plantilla) => {
-    setModo("editar");
-    setFormData({
-      id: plantilla.id,
-      nombre: plantilla.nombre,
-      texto: plantilla.texto,
-    });
+  const abrirModalModificar = (index: number) => {
+    setModo("modificar");
+    setTextoTemporal(categorias[index]);
+    setIndexEditar(index);
     setModalOpen(true);
   };
 
-  const manejarCambio = (
-    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const cerrarModal = () => {
+    setModalOpen(false);
+    setTextoTemporal("");
+    setIndexEditar(null);
   };
 
-  const guardarPlantilla = async () => {
-    const token = localStorage.getItem("token");
-    const usuarioRaw = localStorage.getItem("usuario");
-    const usuario = usuarioRaw ? JSON.parse(usuarioRaw) : null;
-
-    if (!token || !usuario?.id) return;
-
-    try {
-      if (modo === "agregar") {
-        await fetch(API, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            novedad: formData.nombre,
-            plantilla: formData.texto,
-            usuario_id: usuario.id,
-          }),
-        });
-      } else if (modo === "editar" && formData.id) {
-        await fetch(`${API}/${formData.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            novedad: formData.nombre,
-            plantilla: formData.texto,
-          }),
-        });
-      }
-
-      setModalOpen(false);
-      cargarPlantillas();
-    } catch (error) {
-      console.error("Error al guardar plantilla:", error);
+  const guardarModal = () => {
+    if (!textoTemporal.trim()) return;
+    if (modo === "agregar") {
+      setCategorias([...categorias, textoTemporal.trim()]);
+    } else if (modo === "modificar" && indexEditar !== null) {
+      const nuevas = [...categorias];
+      nuevas[indexEditar] = textoTemporal.trim();
+      setCategorias(nuevas);
     }
+    cerrarModal();
+  };
+
+  const copiarTexto = (texto: string) => {
+    navigator.clipboard.writeText(texto)
+      .catch((err) => console.error("Error al copiar el texto:", err));
+  };
+
+  const eliminarCategoria = (index: number) => {
+    const confirmado = window.confirm("¿Estás seguro de eliminar esta categoría?");
+    if (!confirmado) return;
+    const nuevas = categorias.filter((_, i) => i !== index);
+    setCategorias(nuevas);
+  };
+
+  // NUEVO: función para drag & drop
+  const onDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    const items = Array.from(categorias);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setCategorias(items);
   };
 
   return (
-    <div className="plantilla-container">
-      <div className="plantilla-card">
-        <h2 className="plantilla-title">📄 Plantillas Adicionales</h2>
-
+    <div className="notas-conciliacion-container">
+      <div className="notas-conciliacion-card">
+        <h2 className="notas-conciliacion-title">🧾 Notas de Conciliación</h2>
         <button className="agregar-button" onClick={abrirModalAgregar}>
-          ➕ Agregar Plantilla
+          ➕ Agregar Categoría
         </button>
-
-        <div className="plantilla-list">
-          {plantillas.map((plantilla) => (
-            <div key={plantilla.id} className="plantilla-item">
-              <div className="plantilla-contenido">
-                <h3 className="plantilla-nombre">{plantilla.nombre}</h3>
-                <p className="plantilla-texto">{plantilla.texto}</p>
+        {/* NUEVO: DragDropContext y Droppable */}
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="categorias-list">
+            {(provided) => (
+              <div
+                className="notas-conciliacion-list"
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {categorias.map((categoria, index) => (
+                  <Draggable key={categoria} draggableId={categoria} index={index}>
+                    {(provided) => (
+                      <div
+                        className="conciliacion-item"
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <p className="conciliacion-texto">{categoria}</p>
+                        <div className="conciliacion-buttons">
+                          <button
+                            className="conciliacion-button"
+                            onClick={() => copiarTexto(categoria)}
+                            title="Copiar"
+                          >
+                            📋
+                          </button>
+                          <button
+                            className="conciliacion-button eliminar"
+                            onClick={() => eliminarCategoria(index)}
+                            title="Eliminar"
+                          >
+                            🗑️
+                          </button>
+                          <button
+                            className="conciliacion-button modificar"
+                            onClick={() => abrirModalModificar(index)}
+                            title="Modificar"
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
               </div>
-              <div className="plantilla-buttons">
-                <button
-                  className="plantilla-button copy"
-                  onClick={() => copiarPlantilla(plantilla.texto)}
-                  title="Copiar"
-                >
-                  📋 Copiar
-                </button>
-                <button
-                  className="plantilla-button edit"
-                  onClick={() => abrirModalEditar(plantilla)}
-                  title="Modificar"
-                >
-                  ✏️ Modificar
-                </button>
-                <button
-                  className="plantilla-button clear"
-                  onClick={() => eliminarPlantilla(plantilla.id)}
-                  title="Eliminar"
-                >
-                  🗑️ Eliminar
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </div>
-
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
-        <h2>{modo === "agregar" ? "Agregar Plantilla" : "Modificar Plantilla"}</h2>
-
-        <label>Título</label>
+      {/* Modal para agregar/modificar categoría */}
+      <Modal isOpen={modalOpen} onClose={cerrarModal}>
+        <h2>{modo === "agregar" ? "Agregar Categoría" : "Modificar Categoría"}</h2>
         <input
           type="text"
-          name="nombre"
-          value={formData.nombre}
-          onChange={manejarCambio}
+          value={textoTemporal}
+          onChange={(e) => setTextoTemporal(e.target.value)}
+          placeholder="Escribe la categoría"
         />
-
-        <label>Contenido</label>
-        <textarea
-          rows={5}
-          name="texto"
-          value={formData.texto}
-          onChange={manejarCambio}
-        />
-
         <div className="modal-buttons">
-          <button onClick={guardarPlantilla} className="modal-save-button">
+          <button onClick={guardarModal} className="modal-save-button">
             {modo === "agregar" ? "💾 Guardar" : "Actualizar"}
           </button>
-
-          {modo === "editar" && (
+          {modo === "modificar" && (
             <button
-              onClick={() => eliminarPlantilla(formData.id)}
+              onClick={() => {
+                if (indexEditar !== null) eliminarCategoria(indexEditar);
+                cerrarModal();
+              }}
               className="modal-delete-button"
             >
-              <FaTrash style={{ marginRight: "6px" }} />
-              Eliminar
+              <FaTrash style={{ marginRight: "8px" }} />
+              🗑️ Eliminar
             </button>
           )}
         </div>
@@ -239,4 +175,4 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
   );
 };
 
-export default PlantillasAdicionales;
+export default NotasConciliacion;
