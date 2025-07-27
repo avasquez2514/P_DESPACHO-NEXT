@@ -112,3 +112,83 @@
 .login-disney-link:hover {
   color: #2563eb;
 }
+
+/* Vista inicial de registro/login */
+.auth-vista-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #23272f 60%, #e5e7eb 100%);
+}
+
+.auth-vista-col {
+  width: 400px;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px #0006;
+  margin: 0 1.5rem;
+}
+
+.auth-vista-left {
+  background: #10b981;
+  color: #fff;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-vista-left h1 {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+}
+
+.auth-vista-left p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.auth-vista-btn {
+  background: #0072d2;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.9rem 0;
+  width: 80%;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.auth-vista-btn:hover {
+  background: #005bb5;
+}
+
+.auth-vista-right {
+  background: #181a20;
+  color: #fff;
+  align-items: center;
+}
+
+.auth-vista-right h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.auth-vista-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+  align-items: center;
+}
+
+.auth-vista-form input {
+  width: 90%;
+}
