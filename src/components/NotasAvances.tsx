@@ -24,6 +24,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
   const [textoNota, setTextoNota] = useState("");
   const [modo, setModo] = useState<"agregar" | "modificar">("agregar");
   const [notaActual, setNotaActual] = useState<Nota | null>(null);
+  const [cargando, setCargando] = useState(false); // 🔄 NUEVO ESTADO DE CARGA
 
   const prefijo = `Gestión-MOC-Torre ${torre}:\n\n`;
 
@@ -31,9 +32,10 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const usuario_id = usuario?.id;
 
-  // Cargar notas y orden desde la API y localStorage
   const cargarNotas = useCallback(async () => {
     if (!usuario_id || !token) return;
+
+    setCargando(true); // 🔄 INICIA CARGA
 
     try {
       const res = await fetch(`${API_URL}/api/notas/avances/${usuario_id}`, {
@@ -48,16 +50,19 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
 
       setNotasAvance(filtradas);
 
-      // Cargar el orden guardado si existe
       const guardado = localStorage.getItem(STORAGE_KEY);
       if (guardado) {
         const ordenGuardada = JSON.parse(guardado) as string[];
-        setOrdenNotas(ordenGuardada.filter((id) => filtradas.some((n: Nota) => n.id === id)));
+        const nuevasIds = filtradas.map((n) => n.id).filter((id) => !ordenGuardada.includes(id));
+        setOrdenNotas([...ordenGuardada, ...nuevasIds]); // ✅ AGREGA NUEVAS NOTAS
       } else {
         setOrdenNotas(filtradas.map((n: Nota) => n.id));
       }
+
     } catch (error) {
       console.error("Error al cargar notas:", error);
+    } finally {
+      setCargando(false); // 🔄 TERMINA CARGA
     }
   }, [usuario_id, token]);
 
@@ -65,7 +70,6 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     cargarNotas();
   }, [cargarNotas]);
 
-  // Guardar el orden en localStorage cada vez que cambie
   useEffect(() => {
     if (ordenNotas.length) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(ordenNotas));
@@ -139,7 +143,6 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     }
   };
 
-  // Drag & drop: actualiza el orden y lo guarda
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const items = Array.from(ordenNotas);
@@ -148,7 +151,6 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     setOrdenNotas(items);
   };
 
-  // Obtener las notas en el orden actual
   const notasOrdenadas = ordenNotas
     .map(id => notasAvance.find((n: Nota) => n.id === id))
     .filter(Boolean) as Nota[];
@@ -160,6 +162,8 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
       <button className="agregar-button" onClick={abrirModalAgregar}>
         ➕ Agregar Nota
       </button>
+
+      {cargando && <p style={{ marginTop: "10px", fontWeight: "bold" }}>⏳ Cargando notas...</p>}
 
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="notas-list">
