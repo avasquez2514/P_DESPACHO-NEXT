@@ -23,7 +23,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
   const [ordenPlantillas, setOrdenPlantillas] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modo, setModo] = useState<"agregar" | "editar">("agregar");
-  const [loading, setLoading] = useState(true); // 👈 NUEVO estado loading
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState<{
     id: string | null;
@@ -40,7 +40,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     if (!token || !usuario?.id) return;
 
     try {
-      setLoading(true); // 👈 Comienza loading
+      setLoading(true);
 
       const res = await fetch(`${API}/${usuario.id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -68,7 +68,6 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       if (guardado) {
         const ordenGuardada = JSON.parse(guardado) as string[];
 
-        // Incluye nuevas plantillas que no estén en el orden guardado
         const nuevasPlantillas = filtradas
           .map((p) => p.id)
           .filter((id) => !ordenGuardada.includes(id));
@@ -77,7 +76,12 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       } else {
         setOrdenPlantillas(filtradas.map((p: Plantilla) => p.id));
       }
-
+    } catch (error) {
+      console.error("Error al cargar plantillas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     cargarPlantillas();
@@ -107,7 +111,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      await cargarPlantillas(); // 👈 Asegura actualización inmediata
+      await cargarPlantillas();
     } catch (error) {
       console.error("Error al eliminar plantilla:", error);
     }
@@ -172,7 +176,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       }
 
       setModalOpen(false);
-      await cargarPlantillas(); // 👈 Asegura actualización tras guardar
+      await cargarPlantillas();
     } catch (error) {
       console.error("Error al guardar plantilla:", error);
     }
