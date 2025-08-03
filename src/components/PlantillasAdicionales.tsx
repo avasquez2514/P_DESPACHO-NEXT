@@ -23,6 +23,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
   const [ordenPlantillas, setOrdenPlantillas] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modo, setModo] = useState<"agregar" | "editar">("agregar");
+  const [loading, setLoading] = useState(true); // 👈 NUEVO estado loading
 
   const [formData, setFormData] = useState<{
     id: string | null;
@@ -32,7 +33,6 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
 
   const API = `${process.env.NEXT_PUBLIC_API_URL}/api/notas`;
 
-  // Cargar plantillas y orden desde la API y localStorage
   const cargarPlantillas = async () => {
     const token = localStorage.getItem("token");
     const usuarioRaw = localStorage.getItem("usuario");
@@ -40,6 +40,8 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     if (!token || !usuario?.id) return;
 
     try {
+      setLoading(true); // 👈 Comienza loading
+
       const res = await fetch(`${API}/${usuario.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -62,7 +64,6 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
 
       setPlantillas(filtradas);
 
-      // Cargar el orden guardado si existe
       const guardado = localStorage.getItem(STORAGE_KEY);
       if (guardado) {
         const ordenGuardada = JSON.parse(guardado) as string[];
@@ -72,6 +73,8 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       }
     } catch (error) {
       console.error("Error al cargar plantillas:", error);
+    } finally {
+      setLoading(false); // 👈 Finaliza loading
     }
   };
 
@@ -79,7 +82,6 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     cargarPlantillas();
   }, []);
 
-  // Guardar el orden en localStorage cada vez que cambie
   useEffect(() => {
     if (ordenPlantillas.length) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(ordenPlantillas));
@@ -104,7 +106,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      cargarPlantillas();
+      await cargarPlantillas(); // 👈 Asegura actualización inmediata
     } catch (error) {
       console.error("Error al eliminar plantilla:", error);
     }
@@ -169,13 +171,12 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       }
 
       setModalOpen(false);
-      cargarPlantillas();
+      await cargarPlantillas(); // 👈 Asegura actualización tras guardar
     } catch (error) {
       console.error("Error al guardar plantilla:", error);
     }
   };
 
-  // Drag & drop: actualiza el orden y lo guarda
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const items = Array.from(ordenPlantillas);
@@ -184,7 +185,6 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     setOrdenPlantillas(items);
   };
 
-  // Obtener las plantillas en el orden actual
   const plantillasOrdenadas = ordenPlantillas
     .map(id => plantillas.find((p: Plantilla) => p.id === id))
     .filter(Boolean) as Plantilla[];
@@ -198,59 +198,63 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
           ➕ Agregar Plantilla
         </button>
 
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="plantillas-list">
-            {(provided) => (
-              <div
-                className="plantilla-list"
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-              >
-                {plantillasOrdenadas.map((plantilla, index) => (
-                  <Draggable key={plantilla.id} draggableId={plantilla.id} index={index}>
-                    {(provided) => (
-                      <div
-                        className="plantilla-item"
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <div className="plantilla-contenido">
-                          <h3 className="plantilla-nombre">{plantilla.nombre}</h3>
-                          <p className="plantilla-texto">{plantilla.texto}</p>
+        {loading ? (
+          <p style={{ textAlign: "center", padding: "1rem" }}>⏳ Cargando plantillas...</p>
+        ) : (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="plantillas-list">
+              {(provided) => (
+                <div
+                  className="plantilla-list"
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {plantillasOrdenadas.map((plantilla, index) => (
+                    <Draggable key={plantilla.id} draggableId={plantilla.id} index={index}>
+                      {(provided) => (
+                        <div
+                          className="plantilla-item"
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <div className="plantilla-contenido">
+                            <h3 className="plantilla-nombre">{plantilla.nombre}</h3>
+                            <p className="plantilla-texto">{plantilla.texto}</p>
+                          </div>
+                          <div className="plantilla-buttons">
+                            <button
+                              className="plantilla-button copy"
+                              onClick={() => copiarPlantilla(plantilla.texto)}
+                              title="Copiar"
+                            >
+                              📋 Copiar
+                            </button>
+                            <button
+                              className="plantilla-button edit"
+                              onClick={() => abrirModalEditar(plantilla)}
+                              title="Modificar"
+                            >
+                              ✏️ Modificar
+                            </button>
+                            <button
+                              className="plantilla-button clear"
+                              onClick={() => eliminarPlantilla(plantilla.id)}
+                              title="Eliminar"
+                            >
+                              🗑️ Eliminar
+                            </button>
+                          </div>
                         </div>
-                        <div className="plantilla-buttons">
-                          <button
-                            className="plantilla-button copy"
-                            onClick={() => copiarPlantilla(plantilla.texto)}
-                            title="Copiar"
-                          >
-                            📋 Copiar
-                          </button>
-                          <button
-                            className="plantilla-button edit"
-                            onClick={() => abrirModalEditar(plantilla)}
-                            title="Modificar"
-                          >
-                            ✏️ Modificar
-                          </button>
-                          <button
-                            className="plantilla-button clear"
-                            onClick={() => eliminarPlantilla(plantilla.id)}
-                            title="Eliminar"
-                          >
-                            🗑️ Eliminar
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
       </div>
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
