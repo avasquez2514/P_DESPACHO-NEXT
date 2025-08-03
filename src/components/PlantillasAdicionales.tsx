@@ -67,16 +67,17 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       const guardado = localStorage.getItem(STORAGE_KEY);
       if (guardado) {
         const ordenGuardada = JSON.parse(guardado) as string[];
-        setOrdenPlantillas(ordenGuardada.filter((id) => filtradas.some((p: Plantilla) => p.id === id)));
+
+        // Incluye nuevas plantillas que no estén en el orden guardado
+        const nuevasPlantillas = filtradas
+          .map((p) => p.id)
+          .filter((id) => !ordenGuardada.includes(id));
+
+        setOrdenPlantillas([...ordenGuardada, ...nuevasPlantillas]);
       } else {
         setOrdenPlantillas(filtradas.map((p: Plantilla) => p.id));
       }
-    } catch (error) {
-      console.error("Error al cargar plantillas:", error);
-    } finally {
-      setLoading(false); // 👈 Finaliza loading
-    }
-  };
+
 
   useEffect(() => {
     cargarPlantillas();
