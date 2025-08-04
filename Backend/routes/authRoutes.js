@@ -11,6 +11,6 @@ const verificarToken = require("../middlewares/auth");
 
 router.post("/registro", registrarUsuario);
 router.post("/login", loginUsuario);
-router.put("/cambiar-contraseña", verificarToken, cambiarContraseña); // ✅ Nueva ruta protegida
+router.put("/cambiar-contraseña", verificarToken, cambiarContraseña); // Ruta protegida
 
 module.exports = router;

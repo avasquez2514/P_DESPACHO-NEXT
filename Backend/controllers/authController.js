@@ -33,7 +33,7 @@ const registrarUsuario = async (req, res) => {
       [id]
     );
 
-    const token = jwt.sign({ id }, JWT_SECRET);
+    const token = jwt.sign({ id, email }, JWT_SECRET);
 
     res.json({
       mensaje: "Registro exitoso",
@@ -61,7 +61,7 @@ const loginUsuario = async (req, res) => {
       return res.status(401).json({ mensaje: "Credenciales incorrectas" });
     }
 
-    const token = jwt.sign({ id: usuario.id }, JWT_SECRET);
+    const token = jwt.sign({ id: usuario.id, email: usuario.email }, JWT_SECRET);
 
     res.json({
       mensaje: "Inicio de sesión exitoso",
@@ -78,20 +78,19 @@ const loginUsuario = async (req, res) => {
   }
 };
 
-// ✅ Nueva función: Cambiar contraseña
+// ✅ SOLO este cambio: usar email, no id
 const cambiarContraseña = async (req, res) => {
-  const { id } = req.usuario; // viene del token
-  const { actual, nueva } = req.body;
+  const { email, actual, nueva } = req.body;
 
   try {
-    const resultado = await db.query("SELECT * FROM usuarios WHERE id = $1", [id]);
+    const resultado = await db.query("SELECT * FROM usuarios WHERE email = $1", [email]);
     const usuario = resultado.rows[0];
 
     if (!usuario || usuario.contraseña !== actual) {
       return res.status(401).json({ mensaje: "Contraseña actual incorrecta" });
     }
 
-    await db.query("UPDATE usuarios SET contraseña = $1 WHERE id = $2", [nueva, id]);
+    await db.query("UPDATE usuarios SET contraseña = $1 WHERE email = $2", [nueva, email]);
 
     res.json({ mensaje: "Contraseña actualizada correctamente" });
   } catch (error) {
