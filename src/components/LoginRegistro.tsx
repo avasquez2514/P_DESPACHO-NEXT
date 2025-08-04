@@ -243,8 +243,9 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
                 }}
                 onClick={() => setModoCambio(true)}
               >
-                Cambiar contraseña
+                ¿Olvidaste tu contraseña?
               </button>
+
             )}
           </>
         )}
