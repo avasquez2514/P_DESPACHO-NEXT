@@ -235,7 +235,12 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               <button
                 type="button"
                 className="login-disney-link"
-                style={{ marginTop: "0.5rem", textDecoration: "underline", background: "none", border: "none" }}
+                style={{
+                  marginTop: "0.5rem",
+                  textDecoration: "underline",
+                  background: "none",
+                  border: "none",
+                }}
                 onClick={() => setModoCambio(true)}
               >
                 Cambiar contraseña
