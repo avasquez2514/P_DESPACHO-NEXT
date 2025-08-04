@@ -38,11 +38,7 @@ const registrarUsuario = async (req, res) => {
     res.json({
       mensaje: "Registro exitoso",
       token,
-      usuario: {
-        id,
-        nombre,
-        email,
-      },
+      usuario: { id, nombre, email },
     });
   } catch (error) {
     console.error("Error en registro:", error);
@@ -78,9 +74,10 @@ const loginUsuario = async (req, res) => {
   }
 };
 
-// ✅ SOLO este cambio: usar email, no id
+// ✅ CAMBIO: usamos el email que viene del token (req.usuario.email)
 const cambiarContraseña = async (req, res) => {
-  const { email, actual, nueva } = req.body;
+  const { actual, nueva } = req.body;
+  const { email } = req.usuario; // viene del token
 
   try {
     const resultado = await db.query("SELECT * FROM usuarios WHERE email = $1", [email]);

@@ -12,7 +12,7 @@ const verificarToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.usuario = decoded; // lo que metiste en el token
+    req.usuario = decoded; // contiene { id, email }
     next();
   } catch (error) {
     return res.status(403).json({ mensaje: "Token inválido" });
