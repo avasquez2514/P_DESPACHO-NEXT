@@ -74,10 +74,10 @@ const loginUsuario = async (req, res) => {
   }
 };
 
-// ✅ CAMBIO: usamos el email que viene del token (req.usuario.email)
+// Ruta protegida (requiere token)
 const cambiarContraseña = async (req, res) => {
   const { actual, nueva } = req.body;
-  const { email } = req.usuario; // viene del token
+  const { email } = req.usuario;
 
   try {
     const resultado = await db.query("SELECT * FROM usuarios WHERE email = $1", [email]);
@@ -96,8 +96,30 @@ const cambiarContraseña = async (req, res) => {
   }
 };
 
+// ✅ Ruta pública (no requiere token)
+const recuperarContraseña = async (req, res) => {
+  const { email, actual, nueva } = req.body;
+
+  try {
+    const resultado = await db.query("SELECT * FROM usuarios WHERE email = $1", [email]);
+    const usuario = resultado.rows[0];
+
+    if (!usuario || usuario.contraseña !== actual) {
+      return res.status(401).json({ mensaje: "Contraseña actual incorrecta" });
+    }
+
+    await db.query("UPDATE usuarios SET contraseña = $1 WHERE email = $2", [nueva, email]);
+
+    res.json({ mensaje: "Contraseña cambiada correctamente sin autenticación" });
+  } catch (error) {
+    console.error("Error en recuperación de contraseña:", error);
+    res.status(500).json({ mensaje: "Error en el servidor" });
+  }
+};
+
 module.exports = {
   registrarUsuario,
   loginUsuario,
   cambiarContraseña,
+  recuperarContraseña,
 };

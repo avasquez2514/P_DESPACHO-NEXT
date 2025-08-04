@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, FormEvent, useEffect } from "react";
+import React, { useState, FormEvent } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "../styles/loginregistro.css";
 
@@ -16,17 +16,11 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
   const [cargando, setCargando] = useState(false);
   const [mostrar, setMostrar] = useState(false);
 
-  // 👉 Para cambiar contraseña
-  const [modoCambio, setModoCambio] = useState(false);
-  const [actual, setActual] = useState("");
+  // 🔧 Recuperar contraseña sin sesión
+  const [modoRecuperar, setModoRecuperar] = useState(false);
+  const [actual, setActual] = useState(""); // 👈 agregado
   const [nueva, setNueva] = useState("");
   const [confirmar, setConfirmar] = useState("");
-  const [usuarioAutenticado, setUsuarioAutenticado] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setUsuarioAutenticado(!!token);
-  }, []);
 
   const guardarSesionEnLocalStorage = (token: string, usuario: any) => {
     localStorage.setItem("token", token);
@@ -35,15 +29,11 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
 
   const manejarEnvio = async (e: FormEvent) => {
     e.preventDefault();
-
     const ruta = esRegistro ? "registro" : "login";
-    const datos = esRegistro
-      ? { email, nombre, contraseña }
-      : { email, contraseña };
+    const datos = esRegistro ? { email, nombre, contraseña } : { email, contraseña };
 
     try {
       setCargando(true);
-
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
       const respuesta = await fetch(`${API_BASE}/api/auth/${ruta}`, {
         method: "POST",
@@ -54,61 +44,51 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
       const resultado = await respuesta.json();
 
       if (!respuesta.ok) {
-        alert(resultado.mensaje || "Error al iniciar sesión o registrarse.");
+        alert(resultado.mensaje || "Error en la autenticación");
         return;
       }
 
       guardarSesionEnLocalStorage(resultado.token, resultado.usuario);
-      alert(resultado.mensaje || "Sesión iniciada correctamente.");
+      alert(resultado.mensaje);
       onLogin(resultado.usuario);
-      setUsuarioAutenticado(true);
     } catch (error) {
-      alert("No se pudo conectar con el servidor.");
+      alert("Error de conexión con el servidor");
     } finally {
       setCargando(false);
     }
   };
 
-  const cambiarContraseña = async (e: FormEvent) => {
+  const recuperarContraseña = async (e: FormEvent) => {
     e.preventDefault();
 
     if (nueva !== confirmar) {
-      alert("La nueva contraseña y su confirmación no coinciden.");
-      return;
-    }
-
-    const token = window.localStorage.getItem("token"); // ✅ token correcto
-
-    if (!token) {
-      alert("No estás autenticado.");
+      alert("Las contraseñas no coinciden");
       return;
     }
 
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const respuesta = await fetch(`${API_BASE}/api/auth/cambiar-contraseña`, {
+      const respuesta = await fetch(`${API_BASE}/api/auth/recuperar-contraseña`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ email, actual, nueva }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, actual, nueva }), // 👈 incluimos "actual"
       });
 
       const resultado = await respuesta.json();
 
       if (!respuesta.ok) {
-        alert(resultado.mensaje || "Error al cambiar la contraseña.");
+        alert(resultado.mensaje || "Error al recuperar contraseña");
         return;
       }
 
       alert(resultado.mensaje);
-      setModoCambio(false);
+      setModoRecuperar(false);
+      setEmail("");
       setActual("");
       setNueva("");
       setConfirmar("");
     } catch (error) {
-      alert("No se pudo conectar con el servidor.");
+      alert("Error de conexión con el servidor");
     }
   };
 
@@ -117,15 +97,15 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
       <div className="login-disney-card">
         <img src="/icono01.png" alt="Logo A" className="login-disney-logo" />
         <h2 className="login-disney-title">
-          {modoCambio
-            ? "Cambiar contraseña"
+          {modoRecuperar
+            ? "Recuperar contraseña"
             : esRegistro
             ? "Registro"
             : "Ingresa tu contraseña"}
         </h2>
 
-        {modoCambio ? (
-          <form onSubmit={cambiarContraseña} className="login-disney-form">
+        {modoRecuperar ? (
+          <form onSubmit={recuperarContraseña} className="login-disney-form">
             <input
               type="email"
               placeholder="Correo electrónico"
@@ -163,12 +143,9 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
             </button>
             <button
               type="button"
-              onClick={() => setModoCambio(false)}
+              onClick={() => setModoRecuperar(false)}
               className="login-disney-btn login-disney-btn-register"
-              style={{
-                marginTop: "0.7rem",
-                background: "linear-gradient(135deg, #3e3e3e, #d84747)",
-              }}
+              style={{ marginTop: "0.7rem", background: "#c62828" }}
             >
               Cancelar
             </button>
@@ -209,9 +186,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
                 <span
                   className="login-disney-eye"
                   onClick={() => setMostrar((v) => !v)}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={mostrar ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   {mostrar ? <FaEyeSlash /> : <FaEye />}
                 </span>
@@ -232,7 +206,10 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               type="button"
               className="login-disney-btn login-disney-btn-register"
               onClick={() => setEsRegistro((v) => !v)}
-              style={{ marginTop: "0.7rem", background: "linear-gradient(135deg, #050709, #88d700ab)" }}
+              style={{
+                marginTop: "0.7rem",
+                background: "linear-gradient(135deg, #050709, #88d700ab)",
+              }}
             >
               {esRegistro ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
             </button>
@@ -248,7 +225,7 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
                 color: "#88d700",
                 cursor: "pointer",
               }}
-              onClick={() => setModoCambio(true)}
+              onClick={() => setModoRecuperar(true)}
             >
               ¿Olvidaste tu contraseña?
             </button>
