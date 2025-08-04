@@ -74,7 +74,7 @@ const loginUsuario = async (req, res) => {
   }
 };
 
-// Ruta protegida (requiere token)
+// 🔒 Ruta protegida (requiere token)
 const cambiarContraseña = async (req, res) => {
   const { actual, nueva } = req.body;
   const { email } = req.usuario;
@@ -96,21 +96,21 @@ const cambiarContraseña = async (req, res) => {
   }
 };
 
-// ✅ Ruta pública (no requiere token)
+// 🔓 Ruta pública (no requiere token)
 const recuperarContraseña = async (req, res) => {
-  const { email, actual, nueva } = req.body;
+  const { email, nueva } = req.body;
 
   try {
     const resultado = await db.query("SELECT * FROM usuarios WHERE email = $1", [email]);
     const usuario = resultado.rows[0];
 
-    if (!usuario || usuario.contraseña !== actual) {
-      return res.status(401).json({ mensaje: "Contraseña actual incorrecta" });
+    if (!usuario) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
 
     await db.query("UPDATE usuarios SET contraseña = $1 WHERE email = $2", [nueva, email]);
 
-    res.json({ mensaje: "Contraseña cambiada correctamente sin autenticación" });
+    res.json({ mensaje: "Contraseña cambiada correctamente" });
   } catch (error) {
     console.error("Error en recuperación de contraseña:", error);
     res.status(500).json({ mensaje: "Error en el servidor" });
