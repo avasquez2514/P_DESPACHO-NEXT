@@ -2,7 +2,6 @@ const db = require("../db");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 
-// ✅ Usa la variable de entorno KEY de Render
 const JWT_SECRET = process.env.KEY;
 
 const registrarUsuario = async (req, res) => {
@@ -79,7 +78,30 @@ const loginUsuario = async (req, res) => {
   }
 };
 
+// ✅ Nueva función: Cambiar contraseña
+const cambiarContraseña = async (req, res) => {
+  const { id } = req.usuario; // viene del token
+  const { actual, nueva } = req.body;
+
+  try {
+    const resultado = await db.query("SELECT * FROM usuarios WHERE id = $1", [id]);
+    const usuario = resultado.rows[0];
+
+    if (!usuario || usuario.contraseña !== actual) {
+      return res.status(401).json({ mensaje: "Contraseña actual incorrecta" });
+    }
+
+    await db.query("UPDATE usuarios SET contraseña = $1 WHERE id = $2", [nueva, id]);
+
+    res.json({ mensaje: "Contraseña actualizada correctamente" });
+  } catch (error) {
+    console.error("Error al cambiar contraseña:", error);
+    res.status(500).json({ mensaje: "Error en el servidor" });
+  }
+};
+
 module.exports = {
   registrarUsuario,
   loginUsuario,
+  cambiarContraseña,
 };
