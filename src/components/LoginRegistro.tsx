@@ -91,7 +91,7 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ actual, nueva }),
+        body: JSON.stringify({ email, actual, nueva }),
       });
 
       const resultado = await respuesta.json();
@@ -126,6 +126,14 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
         {/* ✅ FORMULARIO CAMBIO CONTRASEÑA */}
         {modoCambio ? (
           <form onSubmit={cambiarContraseña} className="login-disney-form">
+            <input
+              type="email"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="login-disney-input"
+            />
             <input
               type="password"
               placeholder="Contraseña actual"
@@ -230,23 +238,22 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               {esRegistro ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
             </button>
 
-            {/* 👉 Botón para cambiar contraseña solo si hay sesión */}
-        
-              <button
-                type="button"
-                className="login-disney-link"
-                style={{
-                  marginTop: "0.5rem",
-                  textDecoration: "underline",
-                  background: "none",
-                  border: "none",
-                  color: "#88d700", // opcional: dale color visible
-                  cursor: "pointer",
-                }}
-                onClick={() => setModoCambio(true)}
-              >
-                ¿Olvidaste tu contraseña?
-              </button>          
+            {/* 👉 Botón para cambiar contraseña */}
+            <button
+              type="button"
+              className="login-disney-link"
+              style={{
+                marginTop: "0.5rem",
+                textDecoration: "underline",
+                background: "none",
+                border: "none",
+                color: "#88d700",
+                cursor: "pointer",
+              }}
+              onClick={() => setModoCambio(true)}
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
           </>
         )}
       </div>
