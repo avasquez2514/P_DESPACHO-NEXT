@@ -77,7 +77,8 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
       return;
     }
 
-    const token = localStorage.getItem("token");
+    const token = window.localStorage.getItem("token"); // ✅ token correcto
+
     if (!token) {
       alert("No estás autenticado.");
       return;
@@ -123,7 +124,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
             : "Ingresa tu contraseña"}
         </h2>
 
-        {/* ✅ FORMULARIO CAMBIO CONTRASEÑA */}
         {modoCambio ? (
           <form onSubmit={cambiarContraseña} className="login-disney-form">
             <input
@@ -175,7 +175,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
           </form>
         ) : (
           <>
-            {/* 🔐 FORMULARIO LOGIN/REGISTRO */}
             <form onSubmit={manejarEnvio} className="login-disney-form">
               <input
                 type="email"
@@ -238,7 +237,6 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               {esRegistro ? "¿Ya tienes cuenta? Inicia sesión" : "¿No tienes cuenta? Regístrate"}
             </button>
 
-            {/* 👉 Botón para cambiar contraseña */}
             <button
               type="button"
               className="login-disney-link"
