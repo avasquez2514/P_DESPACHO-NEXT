@@ -231,7 +231,7 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
             </button>
 
             {/* 👉 Botón para cambiar contraseña solo si hay sesión */}
-            {usuarioAutenticado && (
+        
               <button
                 type="button"
                 className="login-disney-link"
@@ -240,13 +240,13 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
                   textDecoration: "underline",
                   background: "none",
                   border: "none",
+                  color: "#88d700", // opcional: dale color visible
+                  cursor: "pointer",
                 }}
                 onClick={() => setModoCambio(true)}
               >
                 ¿Olvidaste tu contraseña?
-              </button>
-
-            )}
+              </button>          
           </>
         )}
       </div>
