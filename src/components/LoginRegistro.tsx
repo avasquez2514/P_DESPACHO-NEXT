@@ -35,7 +35,7 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
     try {
       setCargando(true);
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const respuesta = await fetch(`${API_BASE}/api/auth/recuperar-contrasena`, {
+      const respuesta = await fetch(`${API_BASE}/api/auth/${ruta}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos),
@@ -68,10 +68,10 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
 
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const respuesta = await fetch(`${API_BASE}/api/auth/recuperar-contraseña`, {
+      const respuesta = await fetch(`${API_BASE}/api/auth/recuperar-contrasena`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, actual, nueva }), // 👈 incluimos "actual"
+        body: JSON.stringify({ email, actual, nueva }),
       });
 
       const resultado = await respuesta.json();
@@ -222,7 +222,7 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
                 textDecoration: "underline",
                 background: "none",
                 border: "none",
-                color: "#024ce1ff",
+                color: "#305fd7ff",
                 cursor: "pointer",
               }}
               onClick={() => setModoRecuperar(true)}
