@@ -222,7 +222,7 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
                 textDecoration: "underline",
                 background: "none",
                 border: "none",
-                color: "#305fd7ff",
+                color: "#95b3ff",
                 cursor: "pointer",
               }}
               onClick={() => setModoRecuperar(true)}
