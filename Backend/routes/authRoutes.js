@@ -13,6 +13,6 @@ const verificarToken = require("../middlewares/auth");
 router.post("/registro", registrarUsuario);
 router.post("/login", loginUsuario);
 router.put("/cambiar-contraseña", verificarToken, cambiarContraseña); // 🔒 protegida
-router.put("/recuperar-contraseña", recuperarContraseña);             // 🔓 pública
+router.put("/recuperar-contrasena", recuperarContraseña);        // 🔓 pública
 
 module.exports = router;
