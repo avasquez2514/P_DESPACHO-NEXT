@@ -15,10 +15,13 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
   const [contraseña, setContraseña] = useState("");
   const [cargando, setCargando] = useState(false);
   const [mostrar, setMostrar] = useState(false);
+  const [mostrarActual, setMostrarActual] = useState(false);
+  const [mostrarNueva, setMostrarNueva] = useState(false);
+  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
 
   // 🔧 Recuperar contraseña sin sesión
   const [modoRecuperar, setModoRecuperar] = useState(false);
-  const [actual, setActual] = useState(""); // 👈 agregado
+  const [actual, setActual] = useState("");
   const [nueva, setNueva] = useState("");
   const [confirmar, setConfirmar] = useState("");
 
@@ -114,30 +117,61 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
               required
               className="login-disney-input"
             />
-            <input
-              type="password"
-              placeholder="Contraseña actual"
-              value={actual}
-              onChange={(e) => setActual(e.target.value)}
-              required
-              className="login-disney-input"
-            />
-            <input
-              type="password"
-              placeholder="Nueva contraseña"
-              value={nueva}
-              onChange={(e) => setNueva(e.target.value)}
-              required
-              className="login-disney-input"
-            />
-            <input
-              type="password"
-              placeholder="Confirmar nueva contraseña"
-              value={confirmar}
-              onChange={(e) => setConfirmar(e.target.value)}
-              required
-              className="login-disney-input"
-            />
+
+            {/* Contraseña actual */}
+            <div className="login-disney-password-group">
+              <input
+                type={mostrarActual ? "text" : "password"}
+                placeholder="Contraseña actual"
+                value={actual}
+                onChange={(e) => setActual(e.target.value)}
+                required
+                className="login-disney-input"
+              />
+              <span
+                className="login-disney-eye"
+                onClick={() => setMostrarActual((v) => !v)}
+              >
+                {mostrarActual ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+
+            {/* Nueva contraseña */}
+            <div className="login-disney-password-group">
+              <input
+                type={mostrarNueva ? "text" : "password"}
+                placeholder="Nueva contraseña"
+                value={nueva}
+                onChange={(e) => setNueva(e.target.value)}
+                required
+                className="login-disney-input"
+              />
+              <span
+                className="login-disney-eye"
+                onClick={() => setMostrarNueva((v) => !v)}
+              >
+                {mostrarNueva ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+
+            {/* Confirmar nueva contraseña */}
+            <div className="login-disney-password-group">
+              <input
+                type={mostrarConfirmar ? "text" : "password"}
+                placeholder="Confirmar nueva contraseña"
+                value={confirmar}
+                onChange={(e) => setConfirmar(e.target.value)}
+                required
+                className="login-disney-input"
+              />
+              <span
+                className="login-disney-eye"
+                onClick={() => setMostrarConfirmar((v) => !v)}
+              >
+                {mostrarConfirmar ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+
             <button type="submit" className="login-disney-btn">
               Guardar nueva contraseña
             </button>
@@ -190,7 +224,9 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
                   {mostrar ? <FaEyeSlash /> : <FaEye />}
                 </span>
               </div>
-              <small className="login-disney-case">(distingue mayúsculas y minúsculas)</small>
+              <small className="login-disney-case">
+                (distingue mayúsculas y minúsculas)
+              </small>
               <button type="submit" className="login-disney-btn" disabled={cargando}>
                 {cargando
                   ? esRegistro
@@ -222,7 +258,7 @@ const LoginRegistro: React.FC<LoginRegistroProps> = ({ onLogin }) => {
                 textDecoration: "underline",
                 background: "none",
                 border: "none",
-                color: "#95b3ff",
+                color: "#a4baf1ff",
                 cursor: "pointer",
               }}
               onClick={() => setModoRecuperar(true)}
