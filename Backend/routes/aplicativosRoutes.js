@@ -1,8 +1,9 @@
-// Importa Express y crea un enrutador
+// ✅ Rutas de Aplicativos
+
 const express = require("express");
 const router = express.Router();
 
-// Importa los controladores que manejarán la lógica de las rutas
+// Importa los controladores
 const {
   obtenerAplicativos,
   agregarAplicativo,
@@ -17,8 +18,8 @@ router.get("/", obtenerAplicativos);
 
 /**
  * Ruta: POST /api/aplicativos
- * Descripción: Agrega un nuevo aplicativo con nombre, URL, categoría y usuario_id
- * Body esperado: { nombre, url, categoria, usuario_id }
+ * Descripción: Agrega un nuevo aplicativo al usuario
+ * Body esperado: { usuario_id, aplicativo_base_id }
  */
 router.post("/", agregarAplicativo);
 

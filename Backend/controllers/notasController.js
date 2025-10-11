@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require("uuid");
  * 📄 Obtener todas las notas de un usuario
  * GET /api/notas/:usuario_id
  */
-exports.obtenerNotas = async (req, res) => {
+async function obtenerNotas(req, res) {
   const { usuario_id } = req.params;
 
   try {
@@ -35,13 +35,13 @@ exports.obtenerNotas = async (req, res) => {
     console.error("❌ Error al obtener las notas:", error);
     res.status(500).json({ mensaje: "Error al obtener las notas", error });
   }
-};
+}
 
 /**
  * 🧩 Obtener solo las notas de avances (no vacías) de un usuario
  * GET /api/notas/avances/:usuario_id
  */
-exports.obtenerNotasAvances = async (req, res) => {
+async function obtenerNotasAvances(req, res) {
   const { usuario_id } = req.params;
 
   try {
@@ -67,14 +67,14 @@ exports.obtenerNotasAvances = async (req, res) => {
     console.error("❌ Error al obtener notas de avances:", error);
     res.status(500).json({ mensaje: "Error al obtener notas de avances", error });
   }
-};
+}
 
 /**
  * ➕ Agregar una nueva nota (relación usuario ↔ plantilla)
  * POST /api/notas
  * Body: { usuario_id, plantilla_id }
  */
-exports.agregarNota = async (req, res) => {
+async function agregarNota(req, res) {
   const { usuario_id, plantilla_id } = req.body;
 
   try {
@@ -93,14 +93,14 @@ exports.agregarNota = async (req, res) => {
     console.error("❌ Error al agregar nota:", error);
     res.status(500).json({ mensaje: "Error al agregar nota", error });
   }
-};
+}
 
 /**
  * ✏️ Modificar el contenido de una plantilla base
  * PUT /api/notas/plantilla/:id
  * Body: { novedad, nota_publica, nota_interna, nota_avances, plantilla }
  */
-exports.modificarPlantilla = async (req, res) => {
+async function modificarPlantilla(req, res) {
   const { id } = req.params;
   const { novedad, nota_publica, nota_interna, nota_avances, plantilla } = req.body;
 
@@ -119,13 +119,13 @@ exports.modificarPlantilla = async (req, res) => {
     console.error("❌ Error al modificar plantilla:", error);
     res.status(500).json({ mensaje: "Error al modificar plantilla", error });
   }
-};
+}
 
 /**
  * 🗑️ Eliminar una nota (romper la relación usuario-plantilla)
  * DELETE /api/notas/:id
  */
-exports.eliminarNota = async (req, res) => {
+async function eliminarNota(req, res) {
   const { id } = req.params;
 
   try {
@@ -135,13 +135,13 @@ exports.eliminarNota = async (req, res) => {
     console.error("❌ Error al eliminar nota:", error);
     res.status(500).json({ mensaje: "Error al eliminar nota", error });
   }
-};
+}
 
 /**
  * 🧼 Limpiar solo el campo nota_avances de una plantilla base
  * PATCH /api/notas/limpiar-avances/:id
  */
-exports.limpiarNotaAvances = async (req, res) => {
+async function limpiarNotaAvances(req, res) {
   const { id } = req.params;
 
   try {
@@ -151,13 +151,13 @@ exports.limpiarNotaAvances = async (req, res) => {
     console.error("❌ Error al limpiar nota de avances:", error);
     res.status(500).json({ mensaje: "Error al limpiar nota de avances", error });
   }
-};
+}
 
 /**
  * 🚮 Eliminar completamente una plantilla base
  * DELETE /api/notas/plantilla/:id
  */
-exports.eliminarPlantillaAdicional = async (req, res) => {
+async function eliminarPlantillaAdicional(req, res) {
   const { id } = req.params;
 
   try {
@@ -167,4 +167,15 @@ exports.eliminarPlantillaAdicional = async (req, res) => {
     console.error("❌ Error al eliminar plantilla:", error);
     res.status(500).json({ mensaje: "Error al eliminar plantilla", error });
   }
+}
+
+// ✅ Exportar funciones explícitamente
+module.exports = {
+  obtenerNotas,
+  obtenerNotasAvances,
+  agregarNota,
+  modificarPlantilla,
+  eliminarNota,
+  limpiarNotaAvances,
+  eliminarPlantillaAdicional,
 };
