@@ -41,12 +41,75 @@ const obtenerAplicativos = async (req, res) => {
 };
 
 /**
- * Agregar un nuevo aplicativo a un usuario
+ * Agregar un nuevo aplicativo personalizado (crea nueva plantilla base para el usuario)
  * Método: POST
  * Ruta: /api/aplicativos
- * Body esperado: { usuario_id, aplicativo_base_id }
+ * Body esperado: { usuario_id, nombre, url, categoria }
  */
 const agregarAplicativo = async (req, res) => {
+  const { usuario_id, nombre, url, categoria } = req.body;
+
+  // Validar que se proporcionen los datos necesarios
+  if (!usuario_id || !nombre) {
+    return res.status(400).json({ 
+      mensaje: "Se requieren usuario_id y nombre como mínimo" 
+    });
+  }
+
+  try {
+    // Verificar que el usuario existe
+    const usuarioExiste = await pool.query(
+      "SELECT id FROM usuarios WHERE id = $1", 
+      [usuario_id]
+    );
+    
+    if (usuarioExiste.rows.length === 0) {
+      return res.status(404).json({ 
+        mensaje: "Usuario no encontrado" 
+      });
+    }
+
+    // Crear una nueva plantilla base personalizada
+    const aplicativoId = uuidv4();
+    await pool.query(
+      `
+      INSERT INTO aplicativos_base (id, nombre, url, categoria)
+      VALUES ($1, $2, $3, $4)
+      `,
+      [aplicativoId, nombre, url || '', categoria || 'Personalizado']
+    );
+
+    // Crear la relación usuario-aplicativo
+    const relacionId = uuidv4();
+    await pool.query(
+      `
+      INSERT INTO aplicativos_rel (id, usuario_id, aplicativo_base_id, creado_en)
+      VALUES ($1, $2, $3, NOW())
+      `,
+      [relacionId, usuario_id, aplicativoId]
+    );
+
+    res.status(201).json({ 
+      mensaje: "Aplicativo personalizado creado exitosamente",
+      id: relacionId,
+      aplicativo_base_id: aplicativoId
+    });
+  } catch (error) {
+    console.error("❌ Error al agregar aplicativo personalizado:", error);
+    res.status(500).json({ 
+      mensaje: "Error al agregar aplicativo personalizado", 
+      error: error.message 
+    });
+  }
+};
+
+/**
+ * Agregar un aplicativo existente (asignar aplicativo base a usuario)
+ * Método: POST
+ * Ruta: /api/aplicativos/asignar
+ * Body esperado: { usuario_id, aplicativo_base_id }
+ */
+const asignarAplicativo = async (req, res) => {
   const { usuario_id, aplicativo_base_id } = req.body;
 
   // Validar que se proporcionen los datos necesarios
@@ -105,13 +168,13 @@ const agregarAplicativo = async (req, res) => {
     );
 
     res.status(201).json({ 
-      mensaje: "Aplicativo agregado exitosamente",
+      mensaje: "Aplicativo asignado exitosamente",
       id: id
     });
   } catch (error) {
-    console.error("❌ Error al agregar aplicativo:", error);
+    console.error("❌ Error al asignar aplicativo:", error);
     res.status(500).json({ 
-      mensaje: "Error al agregar aplicativo", 
+      mensaje: "Error al asignar aplicativo", 
       error: error.message 
     });
   }
@@ -199,6 +262,7 @@ const obtenerAplicativosDisponibles = async (req, res) => {
 module.exports = {
   obtenerAplicativos,
   agregarAplicativo,
+  asignarAplicativo,
   eliminarAplicativo,
   obtenerAplicativosDisponibles,
 };

@@ -7,6 +7,7 @@ const router = express.Router();
 const {
   obtenerAplicativos,
   agregarAplicativo,
+  asignarAplicativo,
   eliminarAplicativo,
   obtenerAplicativosDisponibles,
 } = require("../controllers/aplicativosController");
@@ -28,10 +29,17 @@ router.get("/disponibles", verificarToken, obtenerAplicativosDisponibles);
 
 /**
  * Ruta: POST /api/aplicativos
- * Descripción: Agrega un nuevo aplicativo al usuario
- * Body esperado: { usuario_id, aplicativo_base_id }
+ * Descripción: Crea un nuevo aplicativo personalizado
+ * Body esperado: { usuario_id, nombre, url, categoria }
  */
 router.post("/", verificarToken, agregarAplicativo);
+
+/**
+ * Ruta: POST /api/aplicativos/asignar
+ * Descripción: Asigna un aplicativo base existente al usuario
+ * Body esperado: { usuario_id, aplicativo_base_id }
+ */
+router.post("/asignar", verificarToken, asignarAplicativo);
 
 /**
  * Ruta: DELETE /api/aplicativos/:id

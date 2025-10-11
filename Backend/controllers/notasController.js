@@ -70,11 +70,80 @@ async function obtenerNotasAvances(req, res) {
 }
 
 /**
- * ➕ Agregar una nueva nota (relación usuario ↔ plantilla)
+ * ➕ Agregar una nueva nota personalizada (crea nueva plantilla base para el usuario)
  * POST /api/notas
- * Body: { usuario_id, plantilla_id }
+ * Body: { usuario_id, novedad, nota_publica, nota_interna, nota_avances, plantilla }
  */
 async function agregarNota(req, res) {
+  const { usuario_id, novedad, nota_publica, nota_interna, nota_avances, plantilla } = req.body;
+
+  // Validar que se proporcionen los datos necesarios
+  if (!usuario_id || !novedad) {
+    return res.status(400).json({ 
+      mensaje: "Se requieren usuario_id y novedad como mínimo" 
+    });
+  }
+
+  try {
+    // Verificar que el usuario existe
+    const usuarioExiste = await pool.query(
+      "SELECT id FROM usuarios WHERE id = $1", 
+      [usuario_id]
+    );
+    
+    if (usuarioExiste.rows.length === 0) {
+      return res.status(404).json({ 
+        mensaje: "Usuario no encontrado" 
+      });
+    }
+
+    // Crear una nueva plantilla base personalizada
+    const plantillaId = uuidv4();
+    await pool.query(
+      `
+      INSERT INTO plantillas_base (id, novedad, nota_publica, nota_interna, nota_avances, plantilla)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      `,
+      [
+        plantillaId, 
+        novedad, 
+        nota_publica || '', 
+        nota_interna || '', 
+        nota_avances || '', 
+        plantilla || ''
+      ]
+    );
+
+    // Crear la relación usuario-plantilla
+    const relacionId = uuidv4();
+    await pool.query(
+      `
+      INSERT INTO notas_despacho_rel (id, usuario_id, plantilla_id, creado_en)
+      VALUES ($1, $2, $3, NOW())
+      `,
+      [relacionId, usuario_id, plantillaId]
+    );
+
+    res.status(201).json({ 
+      mensaje: "Nota personalizada creada exitosamente",
+      id: relacionId,
+      plantilla_id: plantillaId
+    });
+  } catch (error) {
+    console.error("❌ Error al agregar nota personalizada:", error);
+    res.status(500).json({ 
+      mensaje: "Error al agregar nota personalizada", 
+      error: error.message 
+    });
+  }
+}
+
+/**
+ * ➕ Agregar una nota existente (asignar plantilla base a usuario)
+ * POST /api/notas/asignar
+ * Body: { usuario_id, plantilla_id }
+ */
+async function asignarNota(req, res) {
   const { usuario_id, plantilla_id } = req.body;
 
   // Validar que se proporcionen los datos necesarios
@@ -132,13 +201,13 @@ async function agregarNota(req, res) {
     );
 
     res.status(201).json({ 
-      mensaje: "Nota agregada exitosamente",
+      mensaje: "Nota asignada exitosamente",
       id: id
     });
   } catch (error) {
-    console.error("❌ Error al agregar nota:", error);
+    console.error("❌ Error al asignar nota:", error);
     res.status(500).json({ 
-      mensaje: "Error al agregar nota", 
+      mensaje: "Error al asignar nota", 
       error: error.message 
     });
   }
@@ -284,6 +353,7 @@ module.exports = {
   obtenerNotas,
   obtenerNotasAvances,
   agregarNota,
+  asignarNota,
   modificarPlantilla,
   eliminarNota,
   limpiarNotaAvances,

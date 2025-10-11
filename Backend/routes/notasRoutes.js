@@ -38,10 +38,17 @@ router.get('/plantillas-disponibles', verificarToken, notasController.obtenerPla
 
 /**
  * Ruta: POST /api/notas
- * Descripción: Agrega una nueva nota
- * Body esperado: { usuario_id, plantilla_id }
+ * Descripción: Crea una nueva nota personalizada
+ * Body esperado: { usuario_id, novedad, nota_publica, nota_interna, nota_avances, plantilla }
  */
 router.post('/', verificarToken, notasController.agregarNota);
+
+/**
+ * Ruta: POST /api/notas/asignar
+ * Descripción: Asigna una plantilla base existente al usuario
+ * Body esperado: { usuario_id, plantilla_id }
+ */
+router.post('/asignar', verificarToken, notasController.asignarNota);
 
 /**
  * Ruta: PUT /api/notas/plantilla/:id
