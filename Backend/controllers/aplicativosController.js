@@ -1,3 +1,5 @@
+// ✅ Controlador de Aplicativos Normalizado
+
 // Importa la conexión a la base de datos PostgreSQL
 const db = require("../db");
 
@@ -10,73 +12,83 @@ const { v4: uuidv4 } = require("uuid");
  * Ruta: /api/aplicativos?usuario_id=ID
  */
 const obtenerAplicativos = async (req, res) => {
-  const { usuario_id } = req.query; // Extrae el ID del usuario desde los parámetros de la consulta (?usuario_id=...)
+  const { usuario_id } = req.query; // Extrae el ID del usuario desde la consulta
 
   try {
-    // Ejecuta la consulta a la base de datos para obtener los aplicativos del usuario
+    // 🔹 Consulta los aplicativos asociados a un usuario usando la tabla relacional
     const resultado = await db.query(
-      "SELECT * FROM aplicativos WHERE usuario_id = $1",
+      `
+      SELECT 
+        ar.id,
+        ab.nombre,
+        ab.url,
+        ab.categoria,
+        ar.creado_en
+      FROM aplicativos_rel ar
+      INNER JOIN aplicativos_base ab ON ar.aplicativo_base_id = ab.id
+      WHERE ar.usuario_id = $1
+      ORDER BY ar.creado_en DESC
+      `,
       [usuario_id]
     );
 
-    // Responde con los resultados obtenidos
+    // Devuelve los aplicativos vinculados al usuario
     res.json(resultado.rows);
   } catch (error) {
-    // Manejo de errores en consola y en la respuesta
     console.error("❌ Error al obtener aplicativos:", error);
     res.status(500).json({ mensaje: "Error al obtener aplicativos" });
   }
 };
 
 /**
- * Agregar un nuevo aplicativo al sistema
+ * Agregar un nuevo aplicativo a un usuario
  * Método: POST
  * Ruta: /api/aplicativos
- * Body esperado: { nombre, url, usuario_id, categoria }
+ * Body esperado: { usuario_id, aplicativo_base_id }
  */
 const agregarAplicativo = async (req, res) => {
-  const { nombre, url, usuario_id, categoria } = req.body; // Extrae datos del cuerpo de la solicitud
+  const { usuario_id, aplicativo_base_id } = req.body;
 
   try {
-    const id = uuidv4(); // Genera un ID único para el nuevo aplicativo
+    const id = uuidv4();
 
-    // Inserta el nuevo aplicativo en la base de datos
+    // 🔹 Inserta la relación usuario-aplicativo en la tabla relacional
     await db.query(
-      "INSERT INTO aplicativos (id, nombre, url, usuario_id, categoria) VALUES ($1, $2, $3, $4, $5)",
-      [id, nombre, url, usuario_id, categoria]
+      `
+      INSERT INTO aplicativos_rel (id, usuario_id, aplicativo_base_id, creado_en)
+      VALUES ($1, $2, $3, NOW())
+      `,
+      [id, usuario_id, aplicativo_base_id]
     );
 
-    // Responde con éxito
     res.status(201).json({ mensaje: "Aplicativo agregado exitosamente" });
   } catch (error) {
-    // Manejo de errores en consola y en la respuesta
     console.error("❌ Error al agregar aplicativo:", error);
     res.status(500).json({ mensaje: "Error al agregar aplicativo" });
   }
 };
 
 /**
- * Eliminar un aplicativo por su ID
+ * Eliminar un aplicativo de un usuario
  * Método: DELETE
  * Ruta: /api/aplicativos/:id
+ * (id = id de aplicativos_rel)
  */
 const eliminarAplicativo = async (req, res) => {
-  const { id } = req.params; // Extrae el ID desde los parámetros de la ruta
+  const { id } = req.params;
 
   try {
-    // Elimina el aplicativo correspondiente de la base de datos
-    await db.query("DELETE FROM aplicativos WHERE id = $1", [id]);
+    // 🔹 Elimina la relación usuario-aplicativo (no el aplicativo base)
+    await db.query("DELETE FROM aplicativos_rel WHERE id = $1", [id]);
 
-    // Responde con éxito
     res.json({ mensaje: "Aplicativo eliminado correctamente" });
   } catch (error) {
-    // Manejo de errores en consola y en la respuesta
     console.error("❌ Error al eliminar aplicativo:", error);
     res.status(500).json({ mensaje: "Error al eliminar aplicativo" });
   }
 };
 
-// Exporta los controladores para que puedan ser utilizados en las rutas Express
+// Exporta los controladores
 module.exports = {
   obtenerAplicativos,
   agregarAplicativo,
