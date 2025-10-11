@@ -25,6 +25,12 @@ router.get('/:usuario_id', verificarToken, notasController.obtenerNotas);
  */
 router.get('/avances/:usuario_id', verificarToken, notasController.obtenerNotasAvances);
 
+/**
+ * Ruta: GET /api/notas/plantillas-disponibles
+ * Descripción: Obtiene todas las plantillas base disponibles
+ */
+router.get('/plantillas-disponibles', verificarToken, notasController.obtenerPlantillasDisponibles);
+
 
 // ==============================
 // ✍️ CREAR Y MODIFICAR NOTAS

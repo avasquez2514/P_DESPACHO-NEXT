@@ -77,7 +77,50 @@ async function obtenerNotasAvances(req, res) {
 async function agregarNota(req, res) {
   const { usuario_id, plantilla_id } = req.body;
 
+  // Validar que se proporcionen los datos necesarios
+  if (!usuario_id || !plantilla_id) {
+    return res.status(400).json({ 
+      mensaje: "Se requieren usuario_id y plantilla_id" 
+    });
+  }
+
   try {
+    // Verificar que el usuario existe
+    const usuarioExiste = await pool.query(
+      "SELECT id FROM usuarios WHERE id = $1", 
+      [usuario_id]
+    );
+    
+    if (usuarioExiste.rows.length === 0) {
+      return res.status(404).json({ 
+        mensaje: "Usuario no encontrado" 
+      });
+    }
+
+    // Verificar que la plantilla base existe
+    const plantillaExiste = await pool.query(
+      "SELECT id FROM plantillas_base WHERE id = $1", 
+      [plantilla_id]
+    );
+    
+    if (plantillaExiste.rows.length === 0) {
+      return res.status(404).json({ 
+        mensaje: "Plantilla base no encontrada" 
+      });
+    }
+
+    // Verificar que no existe ya la relación
+    const relacionExiste = await pool.query(
+      "SELECT id FROM notas_despacho_rel WHERE usuario_id = $1 AND plantilla_id = $2", 
+      [usuario_id, plantilla_id]
+    );
+    
+    if (relacionExiste.rows.length > 0) {
+      return res.status(409).json({ 
+        mensaje: "La nota ya está agregada para este usuario" 
+      });
+    }
+
     const id = uuidv4();
 
     await pool.query(
@@ -88,10 +131,16 @@ async function agregarNota(req, res) {
       [id, usuario_id, plantilla_id]
     );
 
-    res.status(201).json({ mensaje: "Nota agregada exitosamente" });
+    res.status(201).json({ 
+      mensaje: "Nota agregada exitosamente",
+      id: id
+    });
   } catch (error) {
     console.error("❌ Error al agregar nota:", error);
-    res.status(500).json({ mensaje: "Error al agregar nota", error });
+    res.status(500).json({ 
+      mensaje: "Error al agregar nota", 
+      error: error.message 
+    });
   }
 }
 
@@ -128,12 +177,43 @@ async function modificarPlantilla(req, res) {
 async function eliminarNota(req, res) {
   const { id } = req.params;
 
+  if (!id) {
+    return res.status(400).json({ 
+      mensaje: "Se requiere el ID de la nota" 
+    });
+  }
+
   try {
-    await pool.query("DELETE FROM notas_despacho_rel WHERE id = $1", [id]);
+    // Verificar que la relación existe antes de eliminar
+    const relacionExiste = await pool.query(
+      "SELECT id FROM notas_despacho_rel WHERE id = $1", 
+      [id]
+    );
+    
+    if (relacionExiste.rows.length === 0) {
+      return res.status(404).json({ 
+        mensaje: "Nota no encontrada" 
+      });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM notas_despacho_rel WHERE id = $1", 
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ 
+        mensaje: "No se pudo eliminar la nota" 
+      });
+    }
+
     res.json({ mensaje: "Nota eliminada correctamente" });
   } catch (error) {
     console.error("❌ Error al eliminar nota:", error);
-    res.status(500).json({ mensaje: "Error al eliminar nota", error });
+    res.status(500).json({ 
+      mensaje: "Error al eliminar nota", 
+      error: error.message 
+    });
   }
 }
 
@@ -169,6 +249,36 @@ async function eliminarPlantillaAdicional(req, res) {
   }
 }
 
+/**
+ * 📋 Obtener todas las plantillas base disponibles
+ * GET /api/notas/plantillas-disponibles
+ */
+async function obtenerPlantillasDisponibles(req, res) {
+  try {
+    const result = await pool.query(
+      `
+      SELECT 
+        id,
+        novedad,
+        nota_publica,
+        nota_interna,
+        nota_avances,
+        plantilla
+      FROM plantillas_base
+      ORDER BY novedad ASC
+      `
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("❌ Error al obtener plantillas disponibles:", error);
+    res.status(500).json({ 
+      mensaje: "Error al obtener plantillas disponibles", 
+      error: error.message 
+    });
+  }
+}
+
 // ✅ Exportar funciones explícitamente
 module.exports = {
   obtenerNotas,
@@ -178,4 +288,5 @@ module.exports = {
   eliminarNota,
   limpiarNotaAvances,
   eliminarPlantillaAdicional,
+  obtenerPlantillasDisponibles,
 };

@@ -8,6 +8,7 @@ const {
   obtenerAplicativos,
   agregarAplicativo,
   eliminarAplicativo,
+  obtenerAplicativosDisponibles,
 } = require("../controllers/aplicativosController");
 
 // Importa el middleware de autenticación
@@ -18,6 +19,12 @@ const verificarToken = require("../middlewares/auth");
  * Descripción: Obtiene todos los aplicativos del usuario según su ID
  */
 router.get("/", verificarToken, obtenerAplicativos);
+
+/**
+ * Ruta: GET /api/aplicativos/disponibles
+ * Descripción: Obtiene todos los aplicativos base disponibles
+ */
+router.get("/disponibles", verificarToken, obtenerAplicativosDisponibles);
 
 /**
  * Ruta: POST /api/aplicativos
