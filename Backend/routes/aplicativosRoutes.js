@@ -10,24 +10,27 @@ const {
   eliminarAplicativo,
 } = require("../controllers/aplicativosController");
 
+// Importa el middleware de autenticación
+const verificarToken = require("../middlewares/auth");
+
 /**
  * Ruta: GET /api/aplicativos?usuario_id=xxx
  * Descripción: Obtiene todos los aplicativos del usuario según su ID
  */
-router.get("/", obtenerAplicativos);
+router.get("/", verificarToken, obtenerAplicativos);
 
 /**
  * Ruta: POST /api/aplicativos
  * Descripción: Agrega un nuevo aplicativo al usuario
  * Body esperado: { usuario_id, aplicativo_base_id }
  */
-router.post("/", agregarAplicativo);
+router.post("/", verificarToken, agregarAplicativo);
 
 /**
  * Ruta: DELETE /api/aplicativos/:id
  * Descripción: Elimina un aplicativo específico por su ID
  */
-router.delete("/:id", eliminarAplicativo);
+router.delete("/:id", verificarToken, eliminarAplicativo);
 
 // Exporta el enrutador para ser usado en server.js
 module.exports = router;

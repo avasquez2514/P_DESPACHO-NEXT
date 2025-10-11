@@ -1,5 +1,5 @@
 // Importa la conexión a la base de datos PostgreSQL
-const db = require("../db");
+const pool = require("../db");
 const { v4: uuidv4 } = require("uuid");
 const jwt = require("jsonwebtoken");
 
@@ -14,7 +14,7 @@ const registrarUsuario = async (req, res) => {
 
   try {
     // Verifica si el correo ya existe
-    const existe = await db.query("SELECT id FROM usuarios WHERE email = $1", [email]);
+    const existe = await pool.query("SELECT id FROM usuarios WHERE email = $1", [email]);
     if (existe.rows.length > 0) {
       return res.status(400).json({ mensaje: "El correo ya está registrado" });
     }
@@ -22,7 +22,7 @@ const registrarUsuario = async (req, res) => {
     const id = uuidv4();
 
     // Inserta nuevo usuario
-    await db.query(
+    await pool.query(
       `INSERT INTO usuarios (id, nombre, email, contraseña)
        VALUES ($1, $2, $3, $4)`,
       [id, nombre, email, contraseña]
@@ -50,7 +50,7 @@ const loginUsuario = async (req, res) => {
   const { email, contraseña } = req.body;
 
   try {
-    const resultado = await db.query(
+    const resultado = await pool.query(
       "SELECT id, nombre, email, contraseña FROM usuarios WHERE email = $1",
       [email]
     );
@@ -86,7 +86,7 @@ const cambiarContraseña = async (req, res) => {
   const { email } = req.usuario; // viene del middleware de autenticación
 
   try {
-    const resultado = await db.query("SELECT contraseña FROM usuarios WHERE email = $1", [email]);
+    const resultado = await pool.query("SELECT contraseña FROM usuarios WHERE email = $1", [email]);
     if (resultado.rows.length === 0) {
       return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
@@ -96,7 +96,7 @@ const cambiarContraseña = async (req, res) => {
       return res.status(401).json({ mensaje: "Contraseña actual incorrecta" });
     }
 
-    await db.query("UPDATE usuarios SET contraseña = $1 WHERE email = $2", [nueva, email]);
+    await pool.query("UPDATE usuarios SET contraseña = $1 WHERE email = $2", [nueva, email]);
     res.json({ mensaje: "Contraseña actualizada correctamente" });
   } catch (error) {
     console.error("❌ Error al cambiar contraseña:", error);
@@ -112,12 +112,12 @@ const recuperarContraseña = async (req, res) => {
   const { email, nueva } = req.body;
 
   try {
-    const resultado = await db.query("SELECT id FROM usuarios WHERE email = $1", [email]);
+    const resultado = await pool.query("SELECT id FROM usuarios WHERE email = $1", [email]);
     if (resultado.rows.length === 0) {
       return res.status(404).json({ mensaje: "Usuario no encontrado" });
     }
 
-    await db.query("UPDATE usuarios SET contraseña = $1 WHERE email = $2", [nueva, email]);
+    await pool.query("UPDATE usuarios SET contraseña = $1 WHERE email = $2", [nueva, email]);
     res.json({ mensaje: "Contraseña cambiada correctamente" });
   } catch (error) {
     console.error("❌ Error en recuperarContraseña:", error);

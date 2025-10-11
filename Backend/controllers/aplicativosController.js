@@ -1,7 +1,7 @@
 // ✅ Controlador de Aplicativos Normalizado
 
 // Importa la conexión a la base de datos PostgreSQL
-const db = require("../db");
+const pool = require("../db");
 
 // Importa la función uuidv4 del paquete 'uuid' para generar identificadores únicos
 const { v4: uuidv4 } = require("uuid");
@@ -16,7 +16,7 @@ const obtenerAplicativos = async (req, res) => {
 
   try {
     // 🔹 Consulta los aplicativos asociados a un usuario usando la tabla relacional
-    const resultado = await db.query(
+    const resultado = await pool.query(
       `
       SELECT 
         ar.id,
@@ -53,7 +53,7 @@ const agregarAplicativo = async (req, res) => {
     const id = uuidv4();
 
     // 🔹 Inserta la relación usuario-aplicativo en la tabla relacional
-    await db.query(
+    await pool.query(
       `
       INSERT INTO aplicativos_rel (id, usuario_id, aplicativo_base_id, creado_en)
       VALUES ($1, $2, $3, NOW())
@@ -79,7 +79,7 @@ const eliminarAplicativo = async (req, res) => {
 
   try {
     // 🔹 Elimina la relación usuario-aplicativo (no el aplicativo base)
-    await db.query("DELETE FROM aplicativos_rel WHERE id = $1", [id]);
+    await pool.query("DELETE FROM aplicativos_rel WHERE id = $1", [id]);
 
     res.json({ mensaje: "Aplicativo eliminado correctamente" });
   } catch (error) {
