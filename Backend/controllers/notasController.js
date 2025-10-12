@@ -84,6 +84,21 @@ async function agregarNota(req, res) {
     });
   }
 
+  // 🚫 Validar que no se usen nombres incorrectos
+  const nombresIncorrectos = ['AVANCE', 'avance', 'Avance'];
+  if (nombresIncorrectos.includes(novedad.toUpperCase())) {
+    return res.status(400).json({ 
+      mensaje: "El nombre 'AVANCE' no es válido para una plantilla base. Use un nombre descriptivo como 'Reporte de Avances' o 'Seguimiento de Proyecto'",
+      sugerencias: [
+        "Reporte de Avances",
+        "Seguimiento de Proyecto", 
+        "Actualización de Estado",
+        "Progreso de Tarea",
+        "Estado de Actividades"
+      ]
+    });
+  }
+
   try {
     // Verificar que el usuario existe
     const usuarioExiste = await pool.query(
@@ -240,7 +255,7 @@ async function modificarPlantilla(req, res) {
 }
 
 /**
- * 🗑️ Eliminar una nota (romper la relación usuario-plantilla)
+ * 🗑️ Eliminar una nota (romper la relación usuario-plantilla y eliminar plantilla personalizada si es necesario)
  * DELETE /api/notas/:id
  */
 async function eliminarNota(req, res) {
@@ -253,30 +268,59 @@ async function eliminarNota(req, res) {
   }
 
   try {
-    // Verificar que la relación existe antes de eliminar
-    const relacionExiste = await pool.query(
-      "SELECT id FROM notas_despacho_rel WHERE id = $1", 
+    // Primero obtener información de la relación para saber si es plantilla personalizada
+    const relacionInfo = await pool.query(
+      `
+      SELECT 
+        ndr.id as relacion_id,
+        ndr.usuario_id,
+        ndr.plantilla_id,
+        pb.novedad,
+        COUNT(ndr2.id) as total_usuarios_con_esta_plantilla
+      FROM notas_despacho_rel ndr
+      INNER JOIN plantillas_base pb ON ndr.plantilla_id = pb.id
+      LEFT JOIN notas_despacho_rel ndr2 ON pb.id = ndr2.plantilla_id
+      WHERE ndr.id = $1
+      GROUP BY ndr.id, ndr.usuario_id, ndr.plantilla_id, pb.novedad
+      `, 
       [id]
     );
     
-    if (relacionExiste.rows.length === 0) {
+    if (relacionInfo.rows.length === 0) {
       return res.status(404).json({ 
         mensaje: "Nota no encontrada" 
       });
     }
 
-    const result = await pool.query(
+    const info = relacionInfo.rows[0];
+    const esPlantillaPersonalizada = info.total_usuarios_con_esta_plantilla === 1;
+
+    // Eliminar la relación usuario-plantilla
+    const resultRelacion = await pool.query(
       "DELETE FROM notas_despacho_rel WHERE id = $1", 
       [id]
     );
 
-    if (result.rowCount === 0) {
+    if (resultRelacion.rowCount === 0) {
       return res.status(404).json({ 
-        mensaje: "No se pudo eliminar la nota" 
+        mensaje: "No se pudo eliminar la relación de la nota" 
       });
     }
 
-    res.json({ mensaje: "Nota eliminada correctamente" });
+    // Si es una plantilla personalizada (solo la usa este usuario), eliminar también la plantilla base
+    if (esPlantillaPersonalizada) {
+      await pool.query(
+        "DELETE FROM plantillas_base WHERE id = $1", 
+        [info.plantilla_id]
+      );
+      console.log(`✅ Plantilla personalizada "${info.novedad}" eliminada completamente`);
+    }
+
+    res.json({ 
+      mensaje: "Nota eliminada correctamente",
+      plantilla_eliminada: esPlantillaPersonalizada,
+      plantilla_nombre: info.novedad
+    });
   } catch (error) {
     console.error("❌ Error al eliminar nota:", error);
     res.status(500).json({ 
@@ -334,6 +378,7 @@ async function obtenerPlantillasDisponibles(req, res) {
         nota_avances,
         plantilla
       FROM plantillas_base
+      WHERE UPPER(novedad) NOT IN ('AVANCE', 'avance', 'Avance')
       ORDER BY novedad ASC
       `
     );
@@ -343,6 +388,70 @@ async function obtenerPlantillasDisponibles(req, res) {
     console.error("❌ Error al obtener plantillas disponibles:", error);
     res.status(500).json({ 
       mensaje: "Error al obtener plantillas disponibles", 
+      error: error.message 
+    });
+  }
+}
+
+/**
+ * 🧹 Limpiar plantillas con nombres incorrectos (como "AVANCE")
+ * DELETE /api/notas/limpiar-plantillas-incorrectas
+ */
+async function limpiarPlantillasIncorrectas(req, res) {
+  try {
+    // Buscar plantillas con nombres incorrectos
+    const plantillasIncorrectas = await pool.query(
+      `
+      SELECT 
+        pb.id,
+        pb.novedad,
+        COUNT(ndr.id) as total_usuarios
+      FROM plantillas_base pb
+      LEFT JOIN notas_despacho_rel ndr ON pb.id = ndr.plantilla_id
+      WHERE UPPER(pb.novedad) IN ('AVANCE', 'avance', 'Avance')
+      GROUP BY pb.id, pb.novedad
+      `
+    );
+
+    if (plantillasIncorrectas.rows.length === 0) {
+      return res.json({ 
+        mensaje: "No hay plantillas con nombres incorrectos",
+        plantillas_eliminadas: 0
+      });
+    }
+
+    let plantillasEliminadas = 0;
+
+    // Eliminar cada plantilla incorrecta
+    for (const plantilla of plantillasIncorrectas.rows) {
+      // Primero eliminar las relaciones
+      await pool.query(
+        "DELETE FROM notas_despacho_rel WHERE plantilla_id = $1",
+        [plantilla.id]
+      );
+
+      // Luego eliminar la plantilla
+      await pool.query(
+        "DELETE FROM plantillas_base WHERE id = $1",
+        [plantilla.id]
+      );
+
+      plantillasEliminadas++;
+      console.log(`✅ Plantilla incorrecta "${plantilla.novedad}" eliminada (${plantilla.total_usuarios} usuarios afectados)`);
+    }
+
+    res.json({ 
+      mensaje: `Se eliminaron ${plantillasEliminadas} plantillas con nombres incorrectos`,
+      plantillas_eliminadas: plantillasEliminadas,
+      detalles: plantillasIncorrectas.rows.map(p => ({
+        nombre: p.novedad,
+        usuarios_afectados: p.total_usuarios
+      }))
+    });
+  } catch (error) {
+    console.error("❌ Error al limpiar plantillas incorrectas:", error);
+    res.status(500).json({ 
+      mensaje: "Error al limpiar plantillas incorrectas", 
       error: error.message 
     });
   }
@@ -359,4 +468,5 @@ module.exports = {
   limpiarNotaAvances,
   eliminarPlantillaAdicional,
   obtenerPlantillasDisponibles,
+  limpiarPlantillasIncorrectas,
 };

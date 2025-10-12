@@ -181,7 +181,7 @@ const asignarAplicativo = async (req, res) => {
 };
 
 /**
- * Eliminar un aplicativo de un usuario
+ * Eliminar un aplicativo de un usuario (eliminar relación y aplicativo personalizado si es necesario)
  * Método: DELETE
  * Ruta: /api/aplicativos/:id
  * (id = id de aplicativos_rel)
@@ -196,31 +196,59 @@ const eliminarAplicativo = async (req, res) => {
   }
 
   try {
-    // Verificar que la relación existe antes de eliminar
-    const relacionExiste = await pool.query(
-      "SELECT id FROM aplicativos_rel WHERE id = $1", 
+    // Primero obtener información de la relación para saber si es aplicativo personalizado
+    const relacionInfo = await pool.query(
+      `
+      SELECT 
+        ar.id as relacion_id,
+        ar.usuario_id,
+        ar.aplicativo_base_id,
+        ab.nombre,
+        COUNT(ar2.id) as total_usuarios_con_este_aplicativo
+      FROM aplicativos_rel ar
+      INNER JOIN aplicativos_base ab ON ar.aplicativo_base_id = ab.id
+      LEFT JOIN aplicativos_rel ar2 ON ab.id = ar2.aplicativo_base_id
+      WHERE ar.id = $1
+      GROUP BY ar.id, ar.usuario_id, ar.aplicativo_base_id, ab.nombre
+      `, 
       [id]
     );
     
-    if (relacionExiste.rows.length === 0) {
+    if (relacionInfo.rows.length === 0) {
       return res.status(404).json({ 
         mensaje: "Aplicativo no encontrado para este usuario" 
       });
     }
 
-    // 🔹 Elimina la relación usuario-aplicativo (no el aplicativo base)
-    const result = await pool.query(
+    const info = relacionInfo.rows[0];
+    const esAplicativoPersonalizado = info.total_usuarios_con_este_aplicativo === 1;
+
+    // Eliminar la relación usuario-aplicativo
+    const resultRelacion = await pool.query(
       "DELETE FROM aplicativos_rel WHERE id = $1", 
       [id]
     );
 
-    if (result.rowCount === 0) {
+    if (resultRelacion.rowCount === 0) {
       return res.status(404).json({ 
-        mensaje: "No se pudo eliminar el aplicativo" 
+        mensaje: "No se pudo eliminar la relación del aplicativo" 
       });
     }
 
-    res.json({ mensaje: "Aplicativo eliminado correctamente" });
+    // Si es un aplicativo personalizado (solo lo usa este usuario), eliminar también el aplicativo base
+    if (esAplicativoPersonalizado) {
+      await pool.query(
+        "DELETE FROM aplicativos_base WHERE id = $1", 
+        [info.aplicativo_base_id]
+      );
+      console.log(`✅ Aplicativo personalizado "${info.nombre}" eliminado completamente`);
+    }
+
+    res.json({ 
+      mensaje: "Aplicativo eliminado correctamente",
+      aplicativo_eliminado: esAplicativoPersonalizado,
+      aplicativo_nombre: info.nombre
+    });
   } catch (error) {
     console.error("❌ Error al eliminar aplicativo:", error);
     res.status(500).json({ 

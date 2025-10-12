@@ -79,6 +79,12 @@ router.patch('/limpiar-avances/:id', verificarToken, notasController.limpiarNota
  */
 router.delete('/plantilla/:id', verificarToken, notasController.eliminarPlantillaAdicional);
 
+/**
+ * Ruta: DELETE /api/notas/limpiar-plantillas-incorrectas
+ * Descripción: Elimina plantillas con nombres incorrectos (como "AVANCE")
+ */
+router.delete('/limpiar-plantillas-incorrectas', verificarToken, notasController.limpiarPlantillasIncorrectas);
+
 
 // Exporta el enrutador para ser usado en server.js
 module.exports = router;
