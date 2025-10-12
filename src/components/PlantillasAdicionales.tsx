@@ -7,7 +7,8 @@ import Modal from "./Modal";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 interface Plantilla {
-  id: string;
+  id: string; // plantilla_id
+  relacionId?: string; // ID de la relación notas_despacho_rel
   nombre: string;
   texto: string;
 }
@@ -27,9 +28,10 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
 
   const [formData, setFormData] = useState<{
     id: string | null;
+    relacionId: string | null;
     nombre: string;
     texto: string;
-  }>({ id: null, nombre: "", texto: "" });
+  }>({ id: null, relacionId: null, nombre: "", texto: "" });
 
   const API = `${process.env.NEXT_PUBLIC_API_URL}/api/notas`;
 
@@ -76,7 +78,8 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
             !nota.nota_avances?.trim()
         )
         .map((nota: any) => ({
-          id: nota.id,
+          id: nota.plantilla_id, // Usar plantilla_id para las operaciones de plantilla base
+          relacionId: nota.id, // Guardar el ID de la relación para referencia
           nombre: nota.novedad || "Sin título",
           texto: nota.plantilla,
         }));
@@ -120,15 +123,15 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     );
   };
 
-  const eliminarPlantilla = async (id: string | null) => {
-    if (!id) return;
+  const eliminarPlantilla = async (plantillaId: string | null) => {
+    if (!plantillaId) return;
     const token = localStorage.getItem("token");
     if (!token) return;
 
     if (!window.confirm("¿Estás seguro de eliminar esta plantilla?")) return;
 
     try {
-      const response = await fetch(`${API}/plantilla/${id}`, {
+      const response = await fetch(`${API}/plantilla/${plantillaId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -159,7 +162,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
 
   const abrirModalAgregar = () => {
     setModo("agregar");
-    setFormData({ id: null, nombre: "", texto: "" });
+    setFormData({ id: null, relacionId: null, nombre: "", texto: "" });
     setModalOpen(true);
   };
 
@@ -167,6 +170,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     setModo("editar");
     setFormData({
       id: plantilla.id,
+      relacionId: plantilla.relacionId || null,
       nombre: plantilla.nombre,
       texto: plantilla.texto,
     });

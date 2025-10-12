@@ -375,12 +375,57 @@ async function limpiarNotaAvances(req, res) {
 async function eliminarPlantillaAdicional(req, res) {
   const { id } = req.params;
 
+  console.log("🗑️ Eliminando plantilla base con ID:", id);
+
+  if (!id) {
+    return res.status(400).json({ 
+      mensaje: "Se requiere el ID de la plantilla" 
+    });
+  }
+
   try {
-    await pool.query("DELETE FROM plantillas_base WHERE id = $1", [id]);
-    res.json({ mensaje: "Plantilla eliminada completamente" });
+    // Primero verificar que la plantilla existe
+    const plantillaExiste = await pool.query(
+      "SELECT id, novedad FROM plantillas_base WHERE id = $1", 
+      [id]
+    );
+    
+    if (plantillaExiste.rows.length === 0) {
+      return res.status(404).json({ 
+        mensaje: "Plantilla no encontrada" 
+      });
+    }
+
+    const plantilla = plantillaExiste.rows[0];
+    console.log("📄 Plantilla encontrada:", plantilla.novedad);
+
+    // Eliminar primero todas las relaciones usuario-plantilla
+    const resultRelaciones = await pool.query(
+      "DELETE FROM notas_despacho_rel WHERE plantilla_id = $1", 
+      [id]
+    );
+
+    console.log(`🗑️ Relaciones eliminadas: ${resultRelaciones.rowCount} filas afectadas`);
+
+    // Luego eliminar la plantilla base
+    const resultPlantilla = await pool.query(
+      "DELETE FROM plantillas_base WHERE id = $1", 
+      [id]
+    );
+
+    console.log(`✅ Plantilla "${plantilla.novedad}" eliminada completamente: ${resultPlantilla.rowCount} filas afectadas`);
+
+    res.json({ 
+      mensaje: "Plantilla eliminada completamente",
+      plantilla_nombre: plantilla.novedad,
+      relaciones_eliminadas: resultRelaciones.rowCount
+    });
   } catch (error) {
     console.error("❌ Error al eliminar plantilla:", error);
-    res.status(500).json({ mensaje: "Error al eliminar plantilla", error });
+    res.status(500).json({ 
+      mensaje: "Error al eliminar plantilla", 
+      error: error.message 
+    });
   }
 }
 
