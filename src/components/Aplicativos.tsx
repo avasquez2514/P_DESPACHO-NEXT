@@ -133,7 +133,8 @@ const Aplicativos: React.FC = () => {
       fetchAplicativos();
     } catch (err) {
       console.error("❌ Error al eliminar aplicativo:", err);
-      alert(`Error al eliminar aplicativo: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      alert(`Error al eliminar aplicativo: ${errorMessage}`);
     }
   };
 

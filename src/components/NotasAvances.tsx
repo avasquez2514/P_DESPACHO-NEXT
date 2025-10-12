@@ -105,7 +105,8 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
       cargarNotas();
     } catch (error) {
       console.error("❌ Error al eliminar nota:", error);
-      alert(`Error al eliminar nota: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al eliminar nota: ${errorMessage}`);
     }
   };
 

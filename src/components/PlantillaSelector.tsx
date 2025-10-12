@@ -198,7 +198,8 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
       cargarPlantillas();
     } catch (error) {
       console.error("❌ Error al eliminar plantilla:", error);
-      alert(`Error al eliminar plantilla: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al eliminar plantilla: ${errorMessage}`);
     }
   };
 
