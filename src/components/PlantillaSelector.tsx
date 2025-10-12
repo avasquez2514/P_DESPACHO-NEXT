@@ -47,7 +47,26 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
       const res = await fetch(`${API}/${usuario.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          // Token expirado o inválido
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          window.location.href = "/login";
+          return;
+        }
+        throw new Error(`Error ${res.status}: ${res.statusText}`);
+      }
+
       const data = await res.json();
+
+      // Verificar que data es un array antes de procesarlo
+      if (!Array.isArray(data)) {
+        console.error("Error: La respuesta de la API no es un array:", data);
+        setPlantillas({});
+        return;
+      }
 
       const agrupadas: Record<string, Plantilla> = {};
       data.forEach((row: any) => {
@@ -65,6 +84,7 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
       setPlantillas(agrupadas);
     } catch (error) {
       console.error("Error al cargar plantillas:", error);
+      setPlantillas({});
     }
   };
 
@@ -130,15 +150,20 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
     if (!token || !usuario?.id) return;
 
     try {
+      let response;
+      
       if (modoModal === "agregar") {
-        await fetch(`${API}`, {
+        // Agregar timestamp único al nombre para evitar conflictos
+        const nombreUnico = `${formData.novedad.trim()} - ${Date.now()}`;
+        
+        response = await fetch(`${API}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            novedad: formData.novedad.trim(),
+            novedad: nombreUnico,
             nota_publica: formData.nota_publica.trim(),
             nota_interna: formData.nota_interna.trim(),
             usuario_id: usuario.id,
@@ -146,7 +171,8 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
         });
       } else {
         const actual = plantillas[notaSeleccionada];
-        await fetch(`${API}/plantilla/${actual.plantilla_id}`, {
+        
+        response = await fetch(`${API}/plantilla/${actual.plantilla_id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -163,10 +189,26 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
         setNotaSeleccionada(formData.novedad.trim());
       }
 
+      if (response && !response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          // Token expirado o inválido
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+          window.location.href = "/login";
+          return;
+        }
+        
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.mensaje || `Error ${response.status}: ${response.statusText}`);
+      }
+
       setMostrarModal(false);
       cargarPlantillas();
     } catch (error) {
       console.error("Error al guardar/editar:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al guardar plantilla: ${errorMessage}`);
     }
   };
 
@@ -185,7 +227,16 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 401 || response.status === 403) {
+          // Token expirado o inválido
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+          window.location.href = "/login";
+          return;
+        }
+        
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.mensaje || `Error ${response.status}: ${response.statusText}`);
       }
 
