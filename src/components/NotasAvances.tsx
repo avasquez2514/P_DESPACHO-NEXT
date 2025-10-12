@@ -85,7 +85,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     if (!window.confirm("¿Deseas eliminar esta nota de avances?")) return;
 
     try {
-      await fetch(`${API_URL}/api/notas/avances/${id}`, {
+      await fetch(`${API_URL}/api/notas/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -120,19 +120,25 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            novedad: "AVANCE",
+            novedad: `Nota de Avance - ${new Date().toLocaleDateString()}`,
             nota_avances: textoNota.trim(),
             usuario_id,
           }),
         });
       } else if (modo === "modificar" && notaActual) {
-        await fetch(`${API_URL}/api/notas/${notaActual.id}`, {
+        await fetch(`${API_URL}/api/notas/plantilla/${notaActual.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ nota_avances: textoNota.trim() }),
+          body: JSON.stringify({ 
+            novedad: `Nota de Avance - ${new Date().toLocaleDateString()}`,
+            nota_publica: "",
+            nota_interna: "",
+            nota_avances: textoNota.trim(),
+            plantilla: ""
+          }),
         });
       }
 

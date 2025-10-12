@@ -129,7 +129,7 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
 
     try {
       if (modoModal === "agregar") {
-        await fetch(API, {
+        await fetch(`${API}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -144,7 +144,7 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
         });
       } else {
         const actual = plantillas[notaSeleccionada];
-        await fetch(`${API}/${actual.id}`, {
+        await fetch(`${API}/plantilla/${actual.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -154,6 +154,8 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
             novedad: formData.novedad.trim(),
             nota_publica: formData.nota_publica.trim(),
             nota_interna: formData.nota_interna.trim(),
+            nota_avances: "",
+            plantilla: ""
           }),
         });
         setNotaSeleccionada(formData.novedad.trim());
