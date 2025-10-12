@@ -179,17 +179,26 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
     if (!window.confirm(`¿Eliminar plantilla "${notaSeleccionada}"?`)) return;
 
     try {
-      await fetch(`${API}/${id}`, {
+      const response = await fetch(`${API}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Plantilla eliminada:", result.mensaje);
 
       setNotaSeleccionada("");
       setTextoNota("");
       onSelect("");
       cargarPlantillas();
     } catch (error) {
-      console.error("Error al eliminar:", error);
+      console.error("❌ Error al eliminar plantilla:", error);
+      alert(`Error al eliminar plantilla: ${error.message}`);
     }
   };
 

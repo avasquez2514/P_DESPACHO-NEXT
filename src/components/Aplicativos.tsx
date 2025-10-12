@@ -118,14 +118,22 @@ const Aplicativos: React.FC = () => {
     if (!window.confirm("¿Eliminar este aplicativo?")) return;
 
     try {
-      await fetch(`${API}/${id}`, {
+      const response = await fetch(`${API}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Aplicativo eliminado:", result.mensaje);
       fetchAplicativos();
     } catch (err) {
-      console.error("Error al eliminar:", err);
+      console.error("❌ Error al eliminar aplicativo:", err);
+      alert(`Error al eliminar aplicativo: ${err.message}`);
     }
   };
 

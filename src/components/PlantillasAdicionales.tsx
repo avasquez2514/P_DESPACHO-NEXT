@@ -107,13 +107,22 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     if (!window.confirm("¿Estás seguro de eliminar esta plantilla?")) return;
 
     try {
-      await fetch(`${API}/plantilla/${id}`, {
+      const response = await fetch(`${API}/plantilla/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Plantilla eliminada:", result.mensaje);
       await cargarPlantillas();
     } catch (error) {
-      console.error("Error al eliminar plantilla:", error);
+      console.error("❌ Error al eliminar plantilla:", error);
+      alert(`Error al eliminar plantilla: ${error.message}`);
     }
   };
 

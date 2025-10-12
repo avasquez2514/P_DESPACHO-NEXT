@@ -90,13 +90,22 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
     if (!window.confirm("¿Deseas eliminar esta nota de avances?")) return;
 
     try {
-      await fetch(`${API_URL}/api/notas/${id}`, {
+      const response = await fetch(`${API_URL}/api/notas/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.mensaje || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("✅ Nota eliminada:", result.mensaje);
       cargarNotas();
     } catch (error) {
-      console.error("Error al eliminar nota:", error);
+      console.error("❌ Error al eliminar nota:", error);
+      alert(`Error al eliminar nota: ${error.message}`);
     }
   };
 
