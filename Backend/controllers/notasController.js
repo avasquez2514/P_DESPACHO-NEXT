@@ -49,6 +49,7 @@ async function obtenerNotasAvances(req, res) {
       `
       SELECT 
         ndr.id,
+        ndr.plantilla_id,
         pb.novedad,
         pb.nota_avances,
         ndr.creado_en

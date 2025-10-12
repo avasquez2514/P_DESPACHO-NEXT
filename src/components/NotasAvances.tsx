@@ -6,7 +6,8 @@ import Modal from "./Modal";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 
 interface Nota {
-  id: string;
+  id: string; // ID de la relación (notas_despacho_rel)
+  plantilla_id: string; // ID de la plantilla base
   texto: string;
 }
 
@@ -46,7 +47,11 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
 
       const filtradas: Nota[] = data
         .filter((n: any) => n.nota_avances?.trim())
-        .map((n: any) => ({ id: n.id, texto: n.nota_avances }));
+        .map((n: any) => ({ 
+          id: n.id, 
+          plantilla_id: n.plantilla_id,
+          texto: n.nota_avances 
+        }));
 
       setNotasAvance(filtradas);
 
@@ -126,7 +131,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
           }),
         });
       } else if (modo === "modificar" && notaActual) {
-        await fetch(`${API_URL}/api/notas/plantilla/${notaActual.id}`, {
+        await fetch(`${API_URL}/api/notas/plantilla/${notaActual.plantilla_id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
