@@ -70,7 +70,14 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
 
       const agrupadas: Record<string, Plantilla> = {};
       data.forEach((row: any) => {
-        if (!row.plantilla) {
+        // Solo incluir plantillas que NO son plantillas adicionales y NO son notas de avances
+        const esPlantillaAdicional = row.plantilla?.trim(); // Tiene contenido en plantilla
+        const esNotaAvances = row.nota_avances?.trim() && 
+                             !row.nota_publica?.trim() && 
+                             !row.nota_interna?.trim() && 
+                             !row.plantilla?.trim(); // Solo tiene contenido en nota_avances
+        
+        if (!esPlantillaAdicional && !esNotaAvances) {
           const novedad = row.novedad || "Sin título";
           agrupadas[novedad] = {
             id: row.id,
