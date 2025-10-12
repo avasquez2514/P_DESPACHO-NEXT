@@ -288,12 +288,16 @@ async function eliminarNota(req, res) {
         ndr.usuario_id,
         ndr.plantilla_id,
         pb.novedad,
+        pb.nota_publica,
+        pb.nota_interna,
+        pb.nota_avances,
+        pb.plantilla,
         COUNT(ndr2.id) as total_usuarios_con_esta_plantilla
       FROM notas_despacho_rel ndr
       INNER JOIN plantillas_base pb ON ndr.plantilla_id = pb.id
       LEFT JOIN notas_despacho_rel ndr2 ON pb.id = ndr2.plantilla_id
       WHERE ndr.id = $1
-      GROUP BY ndr.id, ndr.usuario_id, ndr.plantilla_id, pb.novedad
+      GROUP BY ndr.id, ndr.usuario_id, ndr.plantilla_id, pb.novedad, pb.nota_publica, pb.nota_interna, pb.nota_avances, pb.plantilla
       `, 
       [id]
     );
@@ -305,14 +309,30 @@ async function eliminarNota(req, res) {
     }
 
     const info = relacionInfo.rows[0];
-    const esPlantillaPersonalizada = info.total_usuarios_con_esta_plantilla === 1;
+    
+    // Una plantilla es personalizada si:
+    // 1. Solo tiene contenido en nota_avances (es una nota de avances pura)
+    // 2. Solo es usada por un usuario
+    const esNotaAvancesPura = info.nota_avances?.trim() && 
+                             !info.nota_publica?.trim() && 
+                             !info.nota_interna?.trim() && 
+                             !info.plantilla?.trim();
+    
+    const esPlantillaPersonalizada = info.total_usuarios_con_esta_plantilla === 1 || esNotaAvancesPura;
 
     console.log("📊 Info de eliminación:", {
       relacion_id: info.relacion_id,
       plantilla_id: info.plantilla_id,
       novedad: info.novedad,
       es_personalizada: esPlantillaPersonalizada,
-      total_usuarios: info.total_usuarios_con_esta_plantilla
+      es_nota_avances_pura: esNotaAvancesPura,
+      total_usuarios: info.total_usuarios_con_esta_plantilla,
+      contenido: {
+        nota_avances: !!info.nota_avances?.trim(),
+        nota_publica: !!info.nota_publica?.trim(),
+        nota_interna: !!info.nota_interna?.trim(),
+        plantilla: !!info.plantilla?.trim()
+      }
     });
 
     // Eliminar la relación usuario-plantilla

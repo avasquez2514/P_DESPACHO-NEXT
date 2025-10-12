@@ -135,7 +135,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            novedad: `Nota de Avance - ${new Date().toLocaleDateString()}`,
+            novedad: `Nota de Avance - ${new Date().toLocaleDateString()} - ${Date.now()}`,
             nota_avances: textoNota.trim(),
             usuario_id,
           }),
@@ -148,7 +148,7 @@ const NotasAvances: React.FC<NotasAvancesProps> = ({ torre }) => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ 
-            novedad: `Nota de Avance - ${new Date().toLocaleDateString()}`,
+            novedad: `Nota de Avance - ${new Date().toLocaleDateString()} - ${Date.now()}`,
             nota_publica: "",
             nota_interna: "",
             nota_avances: textoNota.trim(),
