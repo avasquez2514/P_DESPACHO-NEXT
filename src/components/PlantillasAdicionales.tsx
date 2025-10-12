@@ -46,7 +46,26 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          // Token expirado o inválido
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          window.location.href = "/login";
+          return;
+        }
+        throw new Error(`Error ${res.status}: ${res.statusText}`);
+      }
+
       const data = await res.json();
+
+      // Verificar que data es un array antes de usar filter
+      if (!Array.isArray(data)) {
+        console.error("Error: La respuesta de la API no es un array:", data);
+        setPlantillas([]);
+        setOrdenPlantillas([]);
+        return;
+      }
 
       const filtradas: Plantilla[] = data
         .filter(
@@ -78,6 +97,8 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       }
     } catch (error) {
       console.error("Error al cargar plantillas:", error);
+      setPlantillas([]);
+      setOrdenPlantillas([]);
     } finally {
       setLoading(false);
     }
@@ -113,7 +134,16 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 401 || response.status === 403) {
+          // Token expirado o inválido
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+          window.location.href = "/login";
+          return;
+        }
+        
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.mensaje || `Error ${response.status}: ${response.statusText}`);
       }
 
@@ -158,8 +188,10 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
     if (!token || !usuario?.id) return;
 
     try {
+      let response;
+      
       if (modo === "agregar") {
-        await fetch(API, {
+        response = await fetch(API, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -172,7 +204,7 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
           }),
         });
       } else if (modo === "editar" && formData.id) {
-        await fetch(`${API}/${formData.id}`, {
+        response = await fetch(`${API}/plantilla/${formData.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -185,10 +217,26 @@ const PlantillasAdicionales: React.FC<PlantillasAdicionalesProps> = ({ torre }) 
         });
       }
 
+      if (response && !response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          // Token expirado o inválido
+          localStorage.removeItem("token");
+          localStorage.removeItem("usuario");
+          alert("Tu sesión ha expirado. Por favor, inicia sesión nuevamente.");
+          window.location.href = "/login";
+          return;
+        }
+        
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.mensaje || `Error ${response.status}: ${response.statusText}`);
+      }
+
       setModalOpen(false);
       await cargarPlantillas();
     } catch (error) {
       console.error("Error al guardar plantilla:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al guardar plantilla: ${errorMessage}`);
     }
   };
 
