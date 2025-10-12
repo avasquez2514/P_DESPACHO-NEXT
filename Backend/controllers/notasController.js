@@ -16,6 +16,7 @@ async function obtenerNotas(req, res) {
       `
       SELECT 
         ndr.id,
+        ndr.plantilla_id,
         pb.novedad,
         pb.nota_publica,
         pb.nota_interna,
@@ -238,8 +239,10 @@ async function modificarPlantilla(req, res) {
   const { id } = req.params;
   const { novedad, nota_publica, nota_interna, nota_avances, plantilla } = req.body;
 
+  console.log("🔧 Modificando plantilla:", { id, novedad, nota_publica, nota_interna, nota_avances, plantilla });
+
   try {
-    await pool.query(
+    const result = await pool.query(
       `
       UPDATE plantillas_base
       SET novedad = $1, nota_publica = $2, nota_interna = $3, nota_avances = $4, plantilla = $5
@@ -248,7 +251,13 @@ async function modificarPlantilla(req, res) {
       [novedad, nota_publica, nota_interna, nota_avances, plantilla, id]
     );
 
-    res.json({ mensaje: "Plantilla actualizada correctamente" });
+    console.log(`✅ Plantilla actualizada: ${result.rowCount} filas afectadas`);
+
+    res.json({ 
+      mensaje: "Plantilla actualizada correctamente",
+      filas_afectadas: result.rowCount,
+      plantilla_id: id
+    });
   } catch (error) {
     console.error("❌ Error al modificar plantilla:", error);
     res.status(500).json({ mensaje: "Error al modificar plantilla", error });
@@ -261,6 +270,8 @@ async function modificarPlantilla(req, res) {
  */
 async function eliminarNota(req, res) {
   const { id } = req.params;
+
+  console.log("🗑️ Eliminando nota con ID:", id);
 
   if (!id) {
     return res.status(400).json({ 
@@ -296,11 +307,21 @@ async function eliminarNota(req, res) {
     const info = relacionInfo.rows[0];
     const esPlantillaPersonalizada = info.total_usuarios_con_esta_plantilla === 1;
 
+    console.log("📊 Info de eliminación:", {
+      relacion_id: info.relacion_id,
+      plantilla_id: info.plantilla_id,
+      novedad: info.novedad,
+      es_personalizada: esPlantillaPersonalizada,
+      total_usuarios: info.total_usuarios_con_esta_plantilla
+    });
+
     // Eliminar la relación usuario-plantilla
     const resultRelacion = await pool.query(
       "DELETE FROM notas_despacho_rel WHERE id = $1", 
       [id]
     );
+
+    console.log(`🗑️ Relación eliminada: ${resultRelacion.rowCount} filas afectadas`);
 
     if (resultRelacion.rowCount === 0) {
       return res.status(404).json({ 
@@ -310,11 +331,11 @@ async function eliminarNota(req, res) {
 
     // Si es una plantilla personalizada (solo la usa este usuario), eliminar también la plantilla base
     if (esPlantillaPersonalizada) {
-      await pool.query(
+      const resultPlantilla = await pool.query(
         "DELETE FROM plantillas_base WHERE id = $1", 
         [info.plantilla_id]
       );
-      console.log(`✅ Plantilla personalizada "${info.novedad}" eliminada completamente`);
+      console.log(`✅ Plantilla personalizada "${info.novedad}" eliminada completamente: ${resultPlantilla.rowCount} filas afectadas`);
     }
 
     res.json({ 

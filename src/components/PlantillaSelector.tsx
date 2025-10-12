@@ -7,7 +7,8 @@ import Modal from "./Modal";
 
 // Tipos
 interface Plantilla {
-  id: string;
+  id: string; // ID de la relación
+  plantilla_id: string; // ID de la plantilla base
   notaPublica: string;
   notaInterna: string;
 }
@@ -54,6 +55,7 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
           const novedad = row.novedad || "Sin título";
           agrupadas[novedad] = {
             id: row.id,
+            plantilla_id: row.plantilla_id,
             notaPublica: row.nota_publica || "",
             notaInterna: row.nota_interna || "",
           };
@@ -144,7 +146,7 @@ const PlantillaSelector: React.FC<PlantillaSelectorProps> = ({ torre, onSelect }
         });
       } else {
         const actual = plantillas[notaSeleccionada];
-        await fetch(`${API}/plantilla/${actual.id}`, {
+        await fetch(`${API}/plantilla/${actual.plantilla_id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
