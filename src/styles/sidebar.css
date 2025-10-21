@@ -1,0 +1,303 @@
+/* =======================
+   🌐 CONTENEDOR GENERAL
+========================== */
+.container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #0f1115; /* Fondo oscuro moderno */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+
+/* =======================
+   📁 SIDEBAR PRINCIPAL
+========================== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -260px; /* Oculto por defecto */
+  width: 230px;
+  height: 100vh;
+  background-color: #0f0f0f; /* Negro carbón */
+  color: #d4d4d8;
+  padding: 25px 20px;
+  transition: left 0.3s ease-in-out;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.6);
+  z-index: 1100;
+  overflow-y: auto;
+}
+
+.sidebar.open {
+  left: 0; /* Se muestra cuando tiene la clase .open */
+}
+
+/* =======================
+   🔘 BOTÓN DE MENÚ
+========================== */
+.menu-button {
+  background-color: #0f0f0f;
+  color: #e4e4e7;
+  border: none;
+  padding: 17px 12px;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+  
+}
+
+.menu-button:hover {
+  background-color: #1a1a1a;
+}
+
+/* Posicionamiento dinámico cuando sidebar está abierto */
+.container.sidebar-open .menu-button {
+  left: 265px;
+  transform: translateY(-50%) rotate(0deg);
+  
+}
+
+/* =======================
+   🧭 MENÚ PRINCIPAL
+========================== */
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: transparent;
+  color: #ffffff;
+  border: none;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.menu-title:hover {
+  background-color: #27272a;
+  color: #ffffff;
+}
+
+/* =======================
+   📂 SUBMENÚS
+========================== */
+.submenu {
+  list-style: none;
+  padding-left: 15px;
+  margin-top: 6px;
+  position: fixed; /* Submenú se mantiene en la vista */
+}
+
+.submenu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: transparent;
+  color: #ffffff;
+  border: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
+  border-radius: 6px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.submenu button:hover,
+.submenu button.active {
+  background-color: #3f3f46;
+  color: #ffffff;
+}
+
+/* Punto decorativo antes de cada submenú */
+.submenu button::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #71717a;
+}
+
+/* Cuando sidebar está abierto, mueve el contenido a la derecha */
+.container.sidebar-open .contenido {
+  margin-left: 260px;
+  transition: margin-left 1.3s ease-in-out;
+}
+
+.menu-button.open {
+
+  transition: left 0.3s ease-in-out;
+}
+
+
+/* =======================
+   📑 SUBMENÚ LATERAL NIVEL 1
+========================== */
+.submenu-lateral {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background-color: #d8d8d8;
+  border: 1px solid #292626;
+  padding: 10px;
+  width: 200px;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  list-style: none;
+}
+
+.submenu-lateral button {
+  background-color: #efeeee;
+  color: #000000;
+  border: none;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 14px;
+  width: 100%;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.submenu-lateral button:hover {
+  background-color: #262c3f;
+}
+
+/* =======================
+   📑 SUBMENÚ LATERAL NIVEL 2
+========================== */
+.submenu-nivel2 {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background-color: #f8f8f8;
+  padding: 5px 0;
+  border-left: 1px solid #ccc;
+  min-width: 180px;
+  z-index: 1000;
+}
+
+.submenu-item {
+  position: relative;
+}
+
+/* =======================
+   📱 RESPONSIVE
+========================== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 80vw;
+    left: -80vw;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .container.sidebar-open .menu-button {
+    left: 80vw;
+  }
+
+  .submenu {
+    position: relative;
+  }
+
+  .submenu-lateral,
+  .submenu-nivel2 {
+    left: auto;
+    position: relative;
+    top: auto;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+  }
+
+  .submenu-lateral button,
+  .submenu-nivel2 button {
+    background-color: #1a1a1a;
+    color: #fff;
+    border-radius: 6px;
+    margin-bottom: 4px;
+  }
+
+  .submenu-lateral button:hover {
+    background-color: #27272a;
+  }
+
+  .menu-button {
+    top: 10%;
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 90vw;
+    left: -90vw;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .container.sidebar-open .menu-button {
+    left: 90vw;
+  }
+
+  .menu-title {
+    font-size: 14px;
+  }
+
+  .submenu button {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+
+  .submenu-lateral button,
+  .submenu-nivel2 button {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+/* =======================
+   🚪 SECCIÓN CIERRE DE SESIÓN
+========================== */
+.logout-section {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  width: calc(100% - 40px);
+}
+
+.logout-button {
+  background-color: #112b54;
+  color: white;
+  border: 1px solid #3b82f6;
+  padding: 10px 12px;
+  font-weight: bold;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #2563eb;
+  color: white;
+}

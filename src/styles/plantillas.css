@@ -1,0 +1,190 @@
+/* =============================== */
+/* CONTENEDOR PRINCIPAL DEL SELECTOR */
+/* =============================== */
+.torre-selector-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 3rem auto;
+  border-radius: 16px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* =============================== */
+/* TARJETA CENTRAL CON CONTENIDO */
+/* =============================== */
+.plantilla-card {
+  padding: 4rem;
+  max-width: 711px;
+  margin: auto;
+  border-radius: 16px;
+
+}
+
+/* =============================== */
+/* TÍTULO PRINCIPAL */
+/* =============================== */
+.plantilla-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* =============================== */
+/* SELECTOR DE NOTAS */
+/* =============================== */
+.plantilla-select {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.plantilla-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* =============================== */
+/* ÁREA DE TEXTO */
+/* =============================== */
+.plantilla-textarea {
+  width: 600px;
+  height: 202px;
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  color: #111827;
+  resize: none;
+  box-shadow: inset 2px 2px 6px #dcdcdc, inset -2px -2px 6px #ffffff;
+  transition: border-color 0.3s ease;
+  margin-bottom: 1.5rem;
+}
+
+/* =============================== */
+/* GRUPO DE BOTONES */
+/* =============================== */
+.plantilla-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 1.5rem;
+  margin-bottom: 12px;
+}
+
+/* BOTÓN BASE */
+.plantilla-button {
+  flex: 1;
+  padding: 0.85rem 1.2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.25s ease-in-out;
+}
+
+/* =============================== */
+/* ESTILOS ESPECÍFICOS DE BOTONES */
+/* =============================== */
+.plantilla-button.publica,
+.plantilla-button.interna {
+  background: linear-gradient(to right, #51545b, #26292e);
+}
+
+.plantilla-button.copy,
+.plantilla-button.clear {
+  background: linear-gradient(to right, #3b82f6, #0e40af);
+}
+
+.plantilla-button.publica:hover,
+.plantilla-button.interna:hover,
+.plantilla-button.copy:hover,
+.plantilla-button.clear:hover {
+  transform: translateY(-3px) scale(1.03);
+}
+
+/* Sombra personalizada para cada botón */
+.plantilla-button.publica:hover {
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.35);
+}
+
+.plantilla-button.interna:hover {
+  box-shadow: 0 8px 18px rgba(30, 64, 175, 0.35);
+}
+
+.plantilla-button.copy:hover {
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.35);
+}
+
+.plantilla-button.clear:hover {
+  box-shadow: 0 8px 18px rgba(239, 68, 68, 0.35);
+}
+
+/* =============================== */
+/* BOTONES DE TORRE */
+/* =============================== */
+.torre-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  width: 100%;
+}
+
+.torre-button {
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(to right, #3b82f6, #0e40af);
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.torre-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* =============================== */
+/* RESPONSIVE ADAPTACIÓN */
+/* =============================== */
+@media (max-width: 640px) {
+  .plantilla-card {
+    padding: 1.5rem;
+  }
+
+  .plantilla-buttons {
+    flex-direction: column;
+  }
+
+  .plantilla-textarea {
+    width: 600px;
+    height: 180px;
+  }
+
+  .torre-buttons {
+    grid-template-columns: 1fr;
+  }
+}
