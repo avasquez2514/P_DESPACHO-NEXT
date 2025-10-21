@@ -53,13 +53,14 @@ const cleanTableHTML = (htmlData: string): string => {
   if (!table) return htmlData;
   
   // Aplicar estilos Gmail a la tabla
-  table.style.cssText = 'border-collapse: collapse; width: 100%; max-width: 100%; font-family: Arial, sans-serif; margin: 15px 0; border: 1px solid #dadce0; background-color: white;';
+  (table as HTMLElement).style.cssText = 'border-collapse: collapse; width: 100%; max-width: 100%; font-family: Arial, sans-serif; margin: 15px 0; border: 1px solid #dadce0; background-color: white;';
   
   // Aplicar estilos a las celdas
   const cells = table.querySelectorAll('td, th');
   cells.forEach((cell, index) => {
-    const isHeader = cell.tagName === 'TH';
-    cell.style.cssText = isHeader 
+    const htmlCell = cell as HTMLElement; // ✅ Fix de tipo
+    const isHeader = htmlCell.tagName === 'TH';
+    htmlCell.style.cssText = isHeader 
       ? 'padding: 8px 12px; border: 1px solid #dadce0; background-color: #f8f9fa; color: #3c4043; font-weight: 500; text-align: left; font-size: 14px;'
       : 'padding: 8px 12px; border: 1px solid #dadce0; background-color: white; color: #3c4043; text-align: left; font-size: 14px;';
   });
@@ -114,10 +115,8 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         const imageItem = items.find(item => item.type.startsWith('image/'));
         
         if (imageItem) {
-          // Manejar imagen - estilo Gmail
           const file = imageItem.getAsFile();
           if (file) {
-            // Verificar el tamaño del archivo (máximo 5MB)
             if (file.size > 5 * 1024 * 1024) {
               alert('La imagen es demasiado grande. Por favor, usa una imagen menor a 5MB.');
               return true;
@@ -135,53 +134,39 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             };
             reader.readAsDataURL(file);
           }
-          return true; // Prevenir pegado por defecto
+          return true;
         }
         
-        // Verificar si hay datos HTML (tablas de Excel desde navegador)
         const htmlData = clipboardData.getData('text/html');
         if (htmlData && htmlData.includes('<table')) {
-          // Limpiar y mejorar el HTML de la tabla
           const cleanedHTML = cleanTableHTML(htmlData);
           editor?.chain().focus().insertContent(cleanedHTML).run();
-          return true; // Prevenir pegado por defecto
+          return true;
         }
         
-        // Verificar si hay datos de texto con tabs (tablas de Excel como texto)
         const textData = clipboardData.getData('text/plain');
         if (textData && (textData.includes('\t') || textData.includes('  '))) {
-          // Convertir datos tabulares a tabla HTML - estilo Gmail
           const tableHTML = convertTextToTableGmail(textData);
           if (tableHTML) {
             editor?.chain().focus().insertContent(tableHTML).run();
-            return true; // Prevenir pegado por defecto
+            return true;
           }
         }
         
-        // Para cualquier otro contenido, permitir pegado normal
         return false;
       },
     },
   });
 
-  // Actualizar el contenido del editor cuando cambie el prop content
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
     }
   }, [editor, content]);
 
-  const addImage = useCallback(() => {
-    const url = window.prompt('URL de la imagen:');
-    if (url) {
-      editor?.chain().focus().setImage({ src: url }).run();
-    }
-  }, [editor]);
-
   const addImageFromFile = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      // Verificar el tamaño del archivo (máximo 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('La imagen es demasiado grande. Por favor, usa una imagen menor a 5MB.');
         event.target.value = '';
@@ -199,11 +184,8 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
       };
       reader.readAsDataURL(file);
     }
-    // Limpiar el input
     event.target.value = '';
   }, [editor]);
-
-  // Función de tabla removida temporalmente
 
   if (!isClient || !editor) {
     return (
@@ -222,6 +204,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
       </div>
     );
   }
+
 
   return (
     <div className="rich-text-editor" ref={containerRef}>
