@@ -294,7 +294,7 @@ export default function RichTextEditor({
       </div>
 
       {/* === Contenido === */}
-        <EditorContent
+          <EditorContent
           editor={editor}
           style={{
             border: "1px solid #d1d5db",
@@ -303,7 +303,7 @@ export default function RichTextEditor({
             borderBottomRightRadius: "6px",
             height: `${height}px`,
             overflow: "auto",
-            textAlign: "left"
+            textAlign: "left",     
           }}
         />
 
