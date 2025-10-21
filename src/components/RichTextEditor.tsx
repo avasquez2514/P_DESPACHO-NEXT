@@ -107,54 +107,57 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
         style: 'min-height: 200px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; background-color: white;',
       },
-      handlePaste: (view, event) => {
-        const clipboardData = event.clipboardData;
-        const items = Array.from(clipboardData.items);
-        
-        // Verificar si hay una imagen en el portapapeles
-        const imageItem = items.find(item => item.type.startsWith('image/'));
-        
-        if (imageItem) {
-          const file = imageItem.getAsFile();
-          if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-              alert('La imagen es demasiado grande. Por favor, usa una imagen menor a 5MB.');
-              return true;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const imageDataUrl = e.target?.result as string;
-              editor?.chain().focus().setImage({ 
-                src: imageDataUrl,
-                alt: 'Imagen pegada',
-                title: 'Imagen pegada',
-                style: 'max-width: 100%; height: auto; display: block; margin: 10px auto;'
-              }).run();
-            };
-            reader.readAsDataURL(file);
-          }
-          return true;
-        }
-        
-        const htmlData = clipboardData.getData('text/html');
-        if (htmlData && htmlData.includes('<table')) {
-          const cleanedHTML = cleanTableHTML(htmlData);
-          editor?.chain().focus().insertContent(cleanedHTML).run();
-          return true;
-        }
-        
-        const textData = clipboardData.getData('text/plain');
-        if (textData && (textData.includes('\t') || textData.includes('  '))) {
-          const tableHTML = convertTextToTableGmail(textData);
-          if (tableHTML) {
-            editor?.chain().focus().insertContent(tableHTML).run();
-            return true;
-          }
-        }
-        
-        return false;
-      },
+   handlePaste: (view, event) => {
+  const clipboardData = event.clipboardData;
+  if (!clipboardData) return false; // ✅ Evita error por null
+
+  const items = Array.from(clipboardData.items);
+
+  // Verificar si hay una imagen en el portapapeles
+  const imageItem = items.find(item => item.type.startsWith('image/'));
+  
+  if (imageItem) {
+    const file = imageItem.getAsFile();
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen es demasiado grande. Por favor, usa una imagen menor a 5MB.');
+        return true;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageDataUrl = e.target?.result as string;
+        editor?.chain().focus().setImage({
+          src: imageDataUrl,
+          alt: 'Imagen pegada',
+          title: 'Imagen pegada',
+          style: 'max-width: 100%; height: auto; display: block; margin: 10px auto;'
+        }).run();
+      };
+      reader.readAsDataURL(file);
+    }
+    return true;
+  }
+
+  const htmlData = clipboardData.getData('text/html');
+  if (htmlData && htmlData.includes('<table')) {
+    const cleanedHTML = cleanTableHTML(htmlData);
+    editor?.chain().focus().insertContent(cleanedHTML).run();
+    return true;
+  }
+
+  const textData = clipboardData.getData('text/plain');
+  if (textData && (textData.includes('\t') || textData.includes('  '))) {
+    const tableHTML = convertTextToTableGmail(textData);
+    if (tableHTML) {
+      editor?.chain().focus().insertContent(tableHTML).run();
+      return true;
+    }
+  }
+
+  return false;
+},
+
     },
   });
 
@@ -204,7 +207,6 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
       </div>
     );
   }
-
 
   return (
     <div className="rich-text-editor" ref={containerRef}>
