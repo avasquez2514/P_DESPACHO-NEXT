@@ -328,4 +328,6 @@ export default function RichTextEditor({
     title="Arrastra para redimensionar"
   />
 </div>
-
+      
+);
+}
