@@ -18,7 +18,7 @@ interface NuevoAplicativo {
   categoria: string;
 }
 
-const API = `http://localhost:4000/api/aplicativos`;
+const API = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/aplicativos`;
 
 const Aplicativos: React.FC = () => {
   const [aplicativos, setAplicativos] = useState<Aplicativo[]>([]);
