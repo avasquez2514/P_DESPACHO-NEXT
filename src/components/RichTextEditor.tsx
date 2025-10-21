@@ -293,41 +293,39 @@ export default function RichTextEditor({
         </div>
       </div>
 
-      {/* === Contenido === */}
-          <EditorContent
-          editor={editor}
-          style={{
-            border: "1px solid #d1d5db",
-            borderTop: "none",
-            borderBottomLeftRadius: "6px",
-            borderBottomRightRadius: "6px",
-            height: `${height}px`,
-            overflow: "auto",
-            textAlign: "left",     
-          }}
-        />
+{/* === Contenido === */}
+<div style={{ position: "relative" }}>
+  <EditorContent
+    editor={editor}
+    style={{
+      border: "1px solid #d1d5db",
+      borderTop: "none",
+      borderBottomLeftRadius: "6px",
+      borderBottomRightRadius: "6px",
+      height: `${height}px`,
+      overflow: "auto",
+      textAlign: "left",
+    }}
+  />
 
+  {/* === Redimensionar === */}
+  <div
+    onMouseDown={handleMouseDown}
+    style={{
+      position: "absolute",
+      bottom: "0",
+      right: "0",
+      width: "20px",
+      height: "20px",
+      cursor: "ns-resize",
+      background:
+        "linear-gradient(-45deg, transparent 30%, #d1d5db 30%, #d1d5db 35%, transparent 35%, transparent 65%, #d1d5db 65%, #d1d5db 70%, transparent 70%)",
+      backgroundSize: "8px 8px",
+      borderRadius: "0 0 6px 0",
+      opacity: isResizing ? 0.8 : 0.6,
+      transition: "opacity 0.2s ease",
+    }}
+    title="Arrastra para redimensionar"
+  />
+</div>
 
-        {/* === Redimensionar === */}
-        <div
-          onMouseDown={handleMouseDown}
-          style={{
-            position: "absolute",
-            bottom: "0",
-            right: "0",
-            width: "20px",
-            height: "20px",
-            cursor: "ns-resize",
-            background:
-              "linear-gradient(-45deg, transparent 30%, #d1d5db 30%, #d1d5db 35%, transparent 35%, transparent 65%, #d1d5db 65%, #d1d5db 70%, transparent 70%)",
-            backgroundSize: "8px 8px",
-            borderRadius: "0 0 6px 0",
-            opacity: isResizing ? 0.8 : 0.6,
-            transition: "opacity 0.2s ease",
-          }}
-          title="Arrastra para redimensionar"
-        />
-      </div>
-    </div>
-  );
-}
