@@ -304,6 +304,8 @@ export default function RichTextEditor({
             borderBottomRightRadius: "6px",
             height: `${height}px`,
             overflow: "auto",
+            textAlign: "left",      
+            padding: "10px",       
           }}
         />
 
