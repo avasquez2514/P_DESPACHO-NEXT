@@ -294,7 +294,6 @@ export default function RichTextEditor({
       </div>
 
       {/* === Contenido === */}
-      <div style={{ position: "relative" }}>
         <EditorContent
           editor={editor}
           style={{
@@ -304,10 +303,10 @@ export default function RichTextEditor({
             borderBottomRightRadius: "6px",
             height: `${height}px`,
             overflow: "auto",
-            textAlign: "left",      
-            padding: "10px",       
+            textAlign: "left"
           }}
         />
+
 
         {/* === Redimensionar === */}
         <div
