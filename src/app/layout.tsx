@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Despacho B2B - Gestión Plantillas",
-  description: "Sistema de notas y plantillas despacho B2B",
+  title: "SIGED",
+  description: "Sistema Integral de Gestión de Despacho"",
   themeColor: "#1e88e5", // Añadido para el soporte de PWA
 };
 
