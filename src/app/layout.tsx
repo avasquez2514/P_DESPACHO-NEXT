@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SIGED",
+  title: "SIGED - Despacho-B2B",
   description: "Sistema Integral de Gestión de Despacho",
   themeColor: "#1e88e5", // Añadido para el soporte de PWA
 };
