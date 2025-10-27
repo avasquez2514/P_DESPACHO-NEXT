@@ -15,6 +15,7 @@ const authRoutes = require("./Backend/routes/authRoutes");           // Rutas pa
 const notasRoutes = require("./Backend/routes/notasRoutes");         // Rutas para notas
 const aplicativosRoutes = require("./Backend/routes/aplicativosRoutes"); // Rutas para aplicativos
 const correosRoutes = require("./Backend/routes/correosRoutes");     // Rutas para envío de correos
+const aiRoutes = require("./Backend/routes/aiRoutes");               // Rutas para IA
 
 // Verifica si la aplicación está en modo desarrollo (true si NODE_ENV no es "production")
 const dev = process.env.NODE_ENV !== "production";
@@ -45,6 +46,7 @@ appNext.prepare().then(() => {
   app.use("/api/notas", notasRoutes);           // http://localhost:4000/api/notas
   app.use("/api/aplicativos", aplicativosRoutes); // http://localhost:4000/api/aplicativos
   app.use("/api/correos", correosRoutes);       // http://localhost:4000/api/correos
+  app.use("/api/ai", aiRoutes);                 // http://localhost:4000/api/ai
 
   /**
    * Manejo del frontend

@@ -1,7 +1,7 @@
 /* CONTENEDOR PRINCIPAL */
 /* Área principal centrada y más ancha, con padding vertical generoso */
 .envio-container {
-  max-width: 1000px; /* Mayor ancho que otros contenedores */
+  max-width: 740px; /* Mayor ancho que otros contenedores */
   margin: 3rem auto;
   padding: 3rem 7.5rem; /* Padding vertical amplio, horizontal más reducido */
   border-radius: 15px;
@@ -688,7 +688,7 @@
 
 .rich-text-editor .ProseMirror {
   outline: none;
-  padding: 12px;
+  padding: 4px;
   min-height: 200px;
   border: 1px solid #d1d5db;
   border-top: none;
@@ -833,3 +833,181 @@
     font-size: 13px;
   }
 }
+.rich-text-editor {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  
+}
+
+.editor-toolbar {
+  border: 1px solid #d1d5db;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background-color: #f9fafb;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.toolbar-btn {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.toolbar-btn.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.toolbar-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.editor-wrapper {
+  position: relative;
+}
+
+.editor-content {
+  border: 1px solid #d1d5db;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  padding: 12px;
+  background-color: white;
+  overflow: auto;
+  min-height: 200px;
+  font-family: Arial, sans-serif;
+}
+
+.editor-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 10px auto;
+  display: block;
+}
+
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  cursor: ns-resize;
+  background: linear-gradient(
+    -45deg,
+    transparent 30%,
+    #d1d5db 30%,
+    #d1d5db 35%,
+    transparent 35%,
+    transparent 65%,
+    #d1d5db 65%,
+    #d1d5db 70%,
+    transparent 70%
+  );
+  background-size: 8px 8px;
+  border-radius: 0 0 6px 0;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.resize-handle.active {
+  opacity: 0.8;
+}
+
+.editor-loading {
+  min-height: 200px;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+/* === Estilo general del editor === */
+.rich-text-editor {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+/* === Barra de herramientas estilo Excel === */
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  background-color: #f3f3f3;
+  border-bottom: 1px solid #d1d5db;
+  padding: 4px 8px;
+}
+
+/* Botones estilo Excel */
+.toolbar-btn {
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  padding: 4px 6px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-btn:hover {
+  background-color: #e5e5e5;
+}
+
+.toolbar-btn.active {
+  background-color: #cce4ff;
+  border-color: #66aaff;
+}
+
+/* Input de color estilo Excel */
+.editor-toolbar input[type="color"] {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  padding: 0;
+  background-color: white;
+  cursor: pointer;
+}
+
+/* Contenedor del área editable */
+.editor-wrapper {
+  position: relative;
+  background: white;
+}
+
+.editor-content {
+  text-align: left;
+  padding: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Control de tamaño */
+.resize-handle {
+  height: 6px;
+  background: #e5e5e5;
+  cursor: ns-resize;
+}
+
+.resize-handle.active {
+  background: #66aaff;
+}
+

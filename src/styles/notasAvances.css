@@ -48,7 +48,7 @@
 
 /* Efecto al pasar el mouse */
 .nota-item {
-  background: #ffffff;
+  background-color: #ffffff !important;
   padding: 16px;
   border-radius: 12px;
   box-shadow: inset 2px 2px 6px #a1a1a1, inset -2px -2px 6px #ffffff;

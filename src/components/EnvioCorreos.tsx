@@ -129,36 +129,37 @@ const EnvioCorreos: React.FC<EnvioCorreosProps> = ({ tipo }) => {
     switch (tipo) {
       case "envioApertura":
         setAsunto(`Asignación Nacional ${fechaMananaGuiones} Logística de Campo B2B - EIA`);
-        setMensaje(`Buen día,
+        setMensaje(`Buen día,<br><br>
 
 Se anexa tabla con la apertura de despacho reparación con la Asignación Nacional ${fechaMananaGuiones}
 
-En las zonas donde falte completar la ratio de órdenes a los técnicos y tecnólogos en el transcurso de la mañana se les estarán asignando las demás órdenes.`);
+En las zonas donde falte completar la ratio de órdenes a los técnicos y tecnólogos en el transcurso de la mañana se les estarán asignando las demás órdenes.<br><br>`);
         break;
 
       case "envioCierre":
         setAsunto(`[Mesa de Despacho] – Informe diario de actualización día de hoy_ ${fechaHoyGuionesBajo}_EIA`);
-        setMensaje(`Cordial saludo.
+        setMensaje(`Cordial saludo,<br><br>
 
 Nos permitimos anexar la programación del día de hoy ${fechaHoyGuionesBajo} debidamente actualizado (estados). De igual manera ya se encuentra disponible en la ruta compartida.
 
-Cualquier inquietud, quedamos atentos.`);
+Cualquier inquietud, quedamos atentos.<br><br>`);
         break;
 
       case "envioInicio":
         setAsunto(`[Mesa de Despacho] – Informe diario de programación_${fechaMananaGuionesBajo}_ EIA`);
-        setMensaje(`Cordial saludo,
+        setMensaje(`Cordial saludo,<br><br>
 
 Nos permitimos anexar la programación para el día de mañana ${fechaMananaGuionesBajo}. De igual manera ya se encuentra disponible en la ruta compartida.
 
-Cualquier inquietud, quedamos atentos.`);
+Cualquier inquietud, quedamos atentos.<br><br>`);
         break;
 
       case "envioPermisos":
         setAsunto("SOLICITUD PERMISOS DE INGRESO");
-        setMensaje(`Cordial saludo,
+        setMensaje(`Cordial saludo,<br><br>
 
-Solicitamos por favor gestionar permisos de ingreso para el siguiente personal, con el fin de poder realizar la reparación.`);
+Solicitamos por favor gestionar permisos de ingreso para el siguiente personal, con el fin de poder realizar la reparación.<br><br>
+`);
         break;
     }
   }, [tipo, fechaHoyGuiones, fechaHoyGuionesBajo, fechaMananaGuiones, fechaMananaGuionesBajo]);

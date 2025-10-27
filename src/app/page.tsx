@@ -7,6 +7,7 @@ import EnvioCorreos from "../components/EnvioCorreos";
 import LoginRegistro from "../components/LoginRegistro";
 import NotasAvances from "../components/NotasAvances";
 import NotasConciliacion from "../components/NotasConciliacion";
+import NotasRapidas from "../components/NotasRapidas";
 import NovedadesAsesor from "../components/NovedadesAsesor";
 import PlantillasAdicionales from "../components/PlantillasAdicionales";
 import PlantillaSelector from "../components/PlantillaSelector";
@@ -112,6 +113,8 @@ export default function Page() {
               <Aplicativos />
             ) : vistaEspecial === "novedadesAsesor" ? (
               <NovedadesAsesor />
+            ) : vistaEspecial === "notasRapidas" ? (
+              <NotasRapidas />
             ) : (
               !modoB2B && !torre && tipoNota && (
                 <TorreSelector onSelect={handleTorreSeleccionada} />

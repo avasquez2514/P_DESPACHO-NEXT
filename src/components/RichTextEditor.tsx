@@ -5,8 +5,12 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
+import { TextStyle } from "@tiptap/extension-text-style";
+import Color from "@tiptap/extension-color";
 import { useCallback, useEffect, useState } from "react";
+import interact from "interactjs";
 import { useResizable } from "../hooks/useResizable";
+import "../styles/envioCorreos.css";
 
 interface RichTextEditorProps {
   content: string;
@@ -14,7 +18,6 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
-// ✅ Convierte texto tabular a tabla HTML con estilo Gmail
 const convertTextToTableGmail = (textData: string): string => {
   const lines = textData.split("\n").filter((line) => line.trim());
   if (lines.length === 0) return "";
@@ -44,12 +47,10 @@ const convertTextToTableGmail = (textData: string): string => {
   return tableHTML;
 };
 
-// ✅ Limpieza y formato Gmail para tablas HTML
 const cleanTableHTML = (htmlData: string): string => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlData, "text/html");
   const table = doc.querySelector("table");
-
   if (!table) return htmlData;
 
   (table as HTMLElement).style.cssText =
@@ -79,19 +80,16 @@ export default function RichTextEditor({
     maxHeight: 800,
   });
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  useEffect(() => setIsClient(true), []);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Image.configure({
-        HTMLAttributes: {
-          style:
-            "max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px; margin: 10px auto; display: block;",
-        },
+        HTMLAttributes: { class: "editor-image" },
       }),
+      TextStyle,
+      Color,
       Placeholder.configure({
         placeholder:
           placeholder ||
@@ -99,26 +97,20 @@ export default function RichTextEditor({
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
-        alignments: ["left", "center", "right", "justify"],
       }),
     ],
     content: content || "",
+    immediatelyRender: false,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
-      attributes: {
-        class:
-          "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none",
-        style:
-          "min-height: 200px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; background-color: white;",
-      },
+      attributes: { class: "editor-content" },
       handlePaste: (view, event) => {
         const clipboardData = event.clipboardData;
-        if (!clipboardData) return false; // ✅ Previene error por null
+        if (!clipboardData) return false;
 
         const items = Array.from(clipboardData.items);
-
-        // 📸 Si hay imagen en el portapapeles
         const imageItem = items.find((item) => item.type.startsWith("image/"));
+
         if (imageItem) {
           const file = imageItem.getAsFile();
           if (file) {
@@ -132,11 +124,7 @@ export default function RichTextEditor({
               editor
                 ?.chain()
                 .focus()
-                .setImage({
-                  src: imageDataUrl,
-                  alt: "Imagen pegada",
-                  title: "Imagen pegada",
-                })
+                .setImage({ src: imageDataUrl, alt: "Imagen pegada" })
                 .run();
             };
             reader.readAsDataURL(file);
@@ -144,7 +132,6 @@ export default function RichTextEditor({
           return true;
         }
 
-        // 📋 Si se pega tabla HTML
         const htmlData = clipboardData.getData("text/html");
         if (htmlData && htmlData.includes("<table")) {
           const cleanedHTML = cleanTableHTML(htmlData);
@@ -152,7 +139,6 @@ export default function RichTextEditor({
           return true;
         }
 
-        // 📊 Si se pega texto tabular
         const textData = clipboardData.getData("text/plain");
         if (textData && (textData.includes("\t") || textData.includes("  "))) {
           const tableHTML = convertTextToTableGmail(textData);
@@ -189,11 +175,7 @@ export default function RichTextEditor({
           editor
             ?.chain()
             .focus()
-            .setImage({
-              src: imageDataUrl,
-              alt: "Imagen cargada",
-              title: "Imagen cargada",
-            })
+            .setImage({ src: imageDataUrl, alt: "Imagen cargada" })
             .run();
         };
         reader.readAsDataURL(file);
@@ -203,127 +185,255 @@ export default function RichTextEditor({
     [editor]
   );
 
-  if (!isClient || !editor) {
-    return (
-      <div
-        style={{
-          minHeight: "200px",
-          padding: "12px",
-          border: "1px solid #d1d5db",
-          borderRadius: "6px",
-          backgroundColor: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#6b7280",
-        }}
-      >
-        Cargando editor...
-      </div>
+  const toggleCase = (toUpper: boolean) => {
+    const selection = editor?.state.doc.textBetween(
+      editor.state.selection.from,
+      editor.state.selection.to
     );
+    if (selection) {
+      const newText = toUpper ? selection.toUpperCase() : selection.toLowerCase();
+      editor?.chain().focus().insertContent(newText).run();
+    }
+  };
+
+  // -----------------------
+  // InteractJS integration
+  // -----------------------
+  useEffect(() => {
+    if (!editor) return;
+    const root = editor.view.dom as HTMLElement;
+
+    const selector = () => Array.from(root.querySelectorAll("img, table")) as HTMLElement[];
+
+    const applyInteract = () => {
+      selector().forEach((el) => {
+        if ((el as any).__interactInit) return;
+        (el as any).__interactInit = true;
+
+        el.style.touchAction = "none";
+        el.style.userSelect = "none";
+        el.style.maxWidth = "100%";
+
+        if (getComputedStyle(el).display !== "table") {
+          el.style.display = "inline-block";
+          (el as HTMLElement).style.verticalAlign = "middle";
+        }
+
+        if (!el.getAttribute("data-x")) el.setAttribute("data-x", "0");
+        if (!el.getAttribute("data-y")) el.setAttribute("data-y", "0");
+
+        // draggable
+        interact(el).draggable({
+          inertia: true,
+          modifiers: [
+            interact.modifiers.restrictRect({
+              restriction: root,
+              endOnly: true,
+            }),
+          ],
+          listeners: {
+            move(event) {
+              const target = event.target as HTMLElement;
+              const dx = (parseFloat(target.getAttribute("data-x") || "0") || 0) + event.dx;
+              const dy = (parseFloat(target.getAttribute("data-y") || "0") || 0) + event.dy;
+              target.style.transform = `translate(${dx}px, ${dy}px)`;
+              target.setAttribute("data-x", String(dx));
+              target.setAttribute("data-y", String(dy));
+            },
+            end() {
+              onChange(editor.getHTML());
+            },
+          },
+        });
+
+        // resizable
+        interact(el).resizable({
+          edges: { left: true, right: true, bottom: true, top: false },
+          inertia: true,
+          listeners: {
+            move(event) {
+              const target = event.target as HTMLElement;
+              const isImg = target.tagName.toLowerCase() === "img";
+
+              const newWidth = event.rect.width;
+              if (isImg) {
+                const imgEl = target as HTMLImageElement;
+                const naturalRatio =
+                  imgEl.naturalWidth && imgEl.naturalHeight
+                    ? imgEl.naturalHeight / imgEl.naturalWidth
+                    : undefined;
+                target.style.width = `${Math.max(40, Math.min(newWidth, root.clientWidth))}px`;
+                if (naturalRatio) target.style.height = `${Math.round(newWidth * naturalRatio)}px`;
+              } else {
+                (target as HTMLElement).style.width = `${Math.max(40, Math.min(newWidth, root.clientWidth))}px`;
+              }
+
+              const dx = (parseFloat(target.getAttribute("data-x") || "0") || 0) + (event.deltaRect.left || 0);
+              const dy = (parseFloat(target.getAttribute("data-y") || "0") || 0) + (event.deltaRect.top || 0);
+              target.style.transform = `translate(${dx}px, ${dy}px)`;
+              target.setAttribute("data-x", String(dx));
+              target.setAttribute("data-y", String(dy));
+            },
+            end() {
+              onChange(editor.getHTML());
+            },
+          },
+          modifiers: [
+            interact.modifiers.restrictSize({
+              min: { width: 40, height: 20 },
+              max: { width: root.clientWidth, height: root.clientHeight * 2 },
+            }),
+          ],
+        });
+      });
+    };
+
+    const obs = new MutationObserver(() => {
+      applyInteract();
+    });
+    obs.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["src", "style", "width"] });
+
+    applyInteract();
+
+    return () => {
+      obs.disconnect();
+      selector().forEach((el) => {
+        try {
+          interact(el).unset();
+        } catch {
+          /* ignore */
+        }
+        delete (el as any).__interactInit;
+      });
+    };
+  }, [editor, onChange]);
+
+  // ✅ NUEVO useEffect para mover/redimensionar imágenes sin interferir con lo existente
+  useEffect(() => {
+    if (!editor) return;
+    const images = document.querySelectorAll(".editor-content img");
+    images.forEach((img) => {
+      img.style.cursor = "move";
+      img.style.maxWidth = "100%";
+      img.addEventListener("mousedown", () => {
+        img.style.outline = "2px solid #007bff";
+      });
+      img.addEventListener("mouseup", () => {
+        img.style.outline = "none";
+      });
+    });
+  }, [editor]);
+
+  if (!isClient || !editor) {
+    return <div className="editor-loading">Cargando editor...</div>;
   }
 
   return (
     <div className="rich-text-editor" ref={containerRef}>
-      {/* === Toolbar === */}
-      <div
-        className="editor-toolbar"
-        style={{
-          border: "1px solid #d1d5db",
-          borderBottom: "none",
-          borderTopLeftRadius: "6px",
-          borderTopRightRadius: "6px",
-          padding: "8px",
-          backgroundColor: "#f9fafb",
-          display: "flex",
-          gap: "8px",
-          flexWrap: "wrap",
-        }}
-      >
-        {/* === Formato básico === */}
+      <div className="editor-toolbar">
+        {/* === Iconos tipo Excel === */}
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
-          style={{
-            padding: "6px 12px",
-            border: "1px solid #d1d5db",
-            borderRadius: "4px",
-            backgroundColor: editor.isActive("bold") ? "#3b82f6" : "white",
-            color: editor.isActive("bold") ? "white" : "black",
-            cursor: "pointer",
-          }}
+          className={`toolbar-btn ${editor.isActive("bold") ? "active" : ""}`}
+          title="Negrita"
         >
-          <strong>B</strong>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M6 4h8a4 4 0 010 8H6V4zm0 8h9a4 4 0 010 8H6v-8z"
+              stroke="black"
+              strokeWidth="2"
+            />
+          </svg>
         </button>
 
         <button
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          style={{
-            padding: "6px 12px",
-            border: "1px solid #d1d5db",
-            borderRadius: "4px",
-            backgroundColor: editor.isActive("italic") ? "#3b82f6" : "white",
-            color: editor.isActive("italic") ? "white" : "black",
-            cursor: "pointer",
-          }}
+          className={`toolbar-btn ${editor.isActive("italic") ? "active" : ""}`}
+          title="Cursiva"
         >
-          <em>I</em>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M10 4h8M6 20h8M12 4l-4 16"
+              stroke="black"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
         </button>
 
-        {/* === Imagen === */}
-        <div style={{ position: "relative" }}>
+        <button
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          className="toolbar-btn"
+          title="Alinear a la izquierda"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M3 6h18M3 12h12M3 18h18" stroke="black" strokeWidth="2" />
+          </svg>
+        </button>
+
+        <button
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          className="toolbar-btn"
+          title="Centrar texto"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M6 6h12M3 12h18M6 18h12" stroke="black" strokeWidth="2" />
+          </svg>
+        </button>
+
+        <button
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          className="toolbar-btn"
+          title="Alinear a la derecha"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M3 6h18M9 12h12M3 18h18" stroke="black" strokeWidth="2" />
+          </svg>
+        </button>
+
+        <input
+          type="color"
+          onChange={(e) => editor.chain().focus().setColor(e.target.value).run()}
+          title="Color de texto"
+        />
+
+        <button onClick={() => toggleCase(true)} className="toolbar-btn" title="Mayúsculas">
+          <span style={{ fontWeight: 600 }}>ABC</span>
+        </button>
+        <button onClick={() => toggleCase(false)} className="toolbar-btn" title="Minúsculas">
+          <span style={{ fontWeight: 400 }}>abc</span>
+        </button>
+
+        <div className="toolbar-upload">
           <input
             type="file"
             accept="image/*"
             onChange={addImageFromFile}
-            style={{ display: "none" }}
             id="image-upload"
+            hidden
           />
           <button
             onClick={() => document.getElementById("image-upload")?.click()}
-            style={{
-              padding: "6px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: "4px",
-              backgroundColor: "white",
-              cursor: "pointer",
-            }}
+            className="toolbar-btn"
+            title="Insertar imagen"
           >
-            🖼️ Imagen
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M4 5h16v14H4V5zm4 4a2 2 0 11-4 0 2 2 0 014 0zm-4 9l5-5 3 3 5-5 3 7H4z"
+                stroke="black"
+                strokeWidth="2"
+                fill="none"
+              />
+            </svg>
           </button>
         </div>
       </div>
 
-      {/* === Contenido === */}
-      <div style={{ position: "relative" }}>
-        <EditorContent
-          editor={editor}
-          style={{
-            border: "1px solid #d1d5db",
-            borderTop: "none",
-            borderBottomLeftRadius: "6px",
-            borderBottomRightRadius: "6px",
-            height: `${height}px`,
-            overflow: "auto",
-          }}
-        />
-
-        {/* === Redimensionar === */}
+      <div className="editor-wrapper">
+        <EditorContent editor={editor} style={{ height: `${height}px` }} />
         <div
           onMouseDown={handleMouseDown}
-          style={{
-            position: "absolute",
-            bottom: "0",
-            right: "0",
-            width: "20px",
-            height: "20px",
-            cursor: "ns-resize",
-            background:
-              "linear-gradient(-45deg, transparent 30%, #d1d5db 30%, #d1d5db 35%, transparent 35%, transparent 65%, #d1d5db 65%, #d1d5db 70%, transparent 70%)",
-            backgroundSize: "8px 8px",
-            borderRadius: "0 0 6px 0",
-            opacity: isResizing ? 0.8 : 0.6,
-            transition: "opacity 0.2s ease",
-          }}
+          className={`resize-handle ${isResizing ? "active" : ""}`}
           title="Arrastra para redimensionar"
         />
       </div>

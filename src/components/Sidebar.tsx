@@ -64,6 +64,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               • DESPACHO B2B
             </button>
 
+
+
+
             {/* Submenús del módulo "DESPACHO B2B", mostrados solo si hay torre seleccionada */}
             {isNotasDespachoOpen && torreSeleccionada && (
               <ul className="submenu">
@@ -145,6 +148,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <li className="submenu-item">
                   <button onClick={() => onVistaEspecial("novedadesAsesor")}>
                     Novedades Asesor
+                  </button>
+                </li>
+
+                {/* Opción de notas rápidas */}
+                <li className="submenu-item">
+                  <button onClick={() => onVistaEspecial("notasRapidas")}>
+                    Notas Rápidas
                   </button>
                 </li>
               </ul>
